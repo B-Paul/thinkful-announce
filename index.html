@@ -28,6 +28,7 @@
         console.log("we're in!")
       } else {
         var clickMe = document.createElement('a');
+        clickMe.textContent = 'authorize';
         clickMe.onclick = handleAuthClick;
         document.body.appendChild(clickMe);
       }
