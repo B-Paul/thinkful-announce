@@ -12,9 +12,13 @@
                            + 'https://docs.google.com/feeds',
         officeHoursSheetId = '1dbQ5XLk8k83b1Za3Ugmp4PW-9QKaW9j46Pmd0fLT96Y';
 
-    gapi.client.setApiKey(googleApiKey);
+    
+    function authorize() {
+      gapi.client.setApiKey(googleApiKey);
+      setTimeout(authorize2, 1);
+    }
 
-    function authorize(usePopUp) {
+    function authorize2(usePopUp) {
       var request = {
         client_id: googleClientId,
         scope: googleScopes,
@@ -27,7 +31,7 @@
         console.log(authResult);
         if (!authResult || authResult.error) {
           console.log('ok summat\'s wrong');
-          if (!usePopUp) { return authorize(true); }
+          if (!usePopUp) { return authorize2(true); }
           console.log('we were using the popup, so we aint gonna retry');
           throw new Error('Authentication error');
         }
