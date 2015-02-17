@@ -15,11 +15,20 @@
       var request = {
         client_id: googleClientId,
         scope: googleScopes,
-        immediate: false
+        immediate: !usePopUp
       };
+
+      console.log(request);
 
       function checkAuth(authResult) {
         console.log(authResult);
+        if (!authResult || authResult.error) {
+          console.log('ok summat\'s wrong');
+          if (!usePopUp) { return authorize(true); }
+          console.log('we were using the popup, so we aint gonna retry');
+          throw new Error('Authentication error');
+        }
+        document.dispatchEvent(new Event('tf-gapi-auth'));
       };
 
       gapi.auth.authorize(request, checkAuth);
