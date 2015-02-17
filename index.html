@@ -3,56 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <title>Document</title>
-  <script type="text/javascript">
-    var slackApiKey        = 'xoxp-2442078175-3326376290-3725937040-91e5d7',
-        googleApiKey       = 'AIzaSyCSYzqlibFyFE93jd_amSQTWDzZ54g0Su4',
-        googleClientId     = '549978578689-gth04j75b4e3g9tme2a983hni8l50775'
-                           + '.apps.googleusercontent.com',
-        googleScopes       = 'https://spreadsheets.google.com/feeds '
-                           + 'https://docs.google.com/feeds',
-        officeHoursSheetId = '1dbQ5XLk8k83b1Za3Ugmp4PW-9QKaW9j46Pmd0fLT96Y';
-
-    
-    function authorize() {
-      gapi.client.setApiKey(googleApiKey);
-      setTimeout(authorize2, 1);
-    }
-
-    function authorize2(usePopUp) {
-      var request = {
-        client_id: googleClientId,
-        scope: googleScopes,
-        immediate: !usePopUp
-      };
-
-      console.log(request);
-
-      function checkAuth(authResult) {
-        console.log(authResult);
-        if (!authResult || authResult.error) {
-          console.log('ok summat\'s wrong');
-          if (!usePopUp) { return authorize2(true); }
-          console.log('we were using the popup, so we aint gonna retry');
-          throw new Error('Authentication error');
-        }
-        document.dispatchEvent(new Event('tf-gapi-auth'));
-      };
-
-      console.log('Im about to call gapi');
-      gapi.auth.authorize(request, checkAuth);
-      console.log('Done with that');
-    }
-
-    document.addEventListener('tf-gapi-auth', function () {
-      console.log('success!');
-    });
-  </script>
-  <script
-    type="text/javascript"
-    src="https://apis.google.com/js/client.js?onload=authorize">
-  </script>
 </head>
 <body>
-  
+  <!--Add a button for the user to click to initiate auth sequence -->
+  <button id="authorize-button" style="visibility: hidden">Authorize</button>
+  <script type="text/javascript">
+
+    var clientId = '837050751313';
+
+    var apiKey = 'AIzaSyAdjHPT5Pb7Nu56WJ_nlrMGOAgUAtKjiPM';
+
+    var scopes = 'https://www.googleapis.com/auth/plus.me';
+
+    function handleClientLoad() {
+      // Step 2: Reference the API key
+      gapi.client.setApiKey(apiKey);
+      window.setTimeout(checkAuth,1);
+    }
+
+    function checkAuth() {
+      gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: true}, handleAuthResult);
+    }
+
+    function handleAuthResult(authResult) {
+      var authorizeButton = document.getElementById('authorize-button');
+      if (authResult && !authResult.error) {
+        authorizeButton.style.visibility = 'hidden';
+        makeApiCall();
+      } else {
+        authorizeButton.style.visibility = '';
+        authorizeButton.onclick = handleAuthClick;
+      }
+    }
+
+    function handleAuthClick(event) {
+      // Step 3: get authorization to use private data
+      gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
+      return false;
+    }
+
+    // Load the API and make an API call.  Display the results on the screen.
+    function makeApiCall() {
+      // Step 4: Load the Google+ API
+      gapi.client.load('plus', 'v1').then(function() {
+        // Step 5: Assemble the API request
+        var request = gapi.client.plus.people.get({
+          'userId': 'me'
+        });
+        // Step 6: Execute the API request
+        request.then(function(resp) {
+          var heading = document.createElement('h4');
+          var image = document.createElement('img');
+          image.src = resp.result.image.url;
+          heading.appendChild(image);
+          heading.appendChild(document.createTextNode(resp.result.displayName));
+
+          document.getElementById('content').appendChild(heading);
+        }, function(reason) {
+          console.log('Error: ' + reason.result.error.message);
+        });
+      });
+    }
+  </script>
+  <!-- Step 1: Load JavaScript client library -->
+  <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
 </body>
 </html>
