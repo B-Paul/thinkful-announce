@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <script type="text/javascript">
+    var slackAPIKey        = 'xoxp-2442078175-3326376290-3725937040-91e5d7',
+        googleAPIKey       = 'AIzaSyCSYzqlibFyFE93jd_amSQTWDzZ54g0Su4',
+        googleClientId     = '549978578689-gth04j75b4e3g9tme2a983hni8l50775'
+                           + '.apps.googleusercontent.com',
+        googleScopes       = 'https://spreadsheets.google.com/feeds '
+                           + 'https://docs.google.com/feeds',
+        officeHoursSheetId = '1dbQ5XLk8k83b1Za3Ugmp4PW-9QKaW9j46Pmd0fLT96Y';
+    function authorize(usePopUp) {
+      var request = {
+        client_id: googleClientId,
+        scope: googleScopes,
+        immediate: false
+      };
+
+      function checkAuth(authResult) {
+        console.log(authResult);
+      };
+
+      gapi.auth.authorize(request, checkAuth);
+    }
+
+    document.addEventListener('tf-gapi-auth', function () {
+      console.log('success!');
+    });
+  </script>
+  <script
+    type="text/javascript"
+    src="https://apis.google.com/js/client.js?onload=authorize">
+  </script>
+</head>
+<body>
+  
+</body>
+</html>
