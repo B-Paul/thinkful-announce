@@ -31,7 +31,9 @@
         document.dispatchEvent(new Event('tf-gapi-auth'));
       };
 
+      console.log('Im about to call gapi');
       gapi.auth.authorize(request, checkAuth);
+      console.log('Done with that');
     }
 
     document.addEventListener('tf-gapi-auth', function () {
