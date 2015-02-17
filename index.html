@@ -6,7 +6,6 @@
 </head>
 <body>
   <!--Add a button for the user to click to initiate auth sequence -->
-  <button id="authorize-button" style="visibility: hidden">Authorize</button>
   <script type="text/javascript">
 
     var clientId = '549978578689-gth04j75b4e3g9tme2a983hni8l50775.apps.googleusercontent.com';
@@ -31,12 +30,11 @@
         authorizeButton.style.visibility = 'hidden';
         makeApiCall();
       } else {
-        authorizeButton.style.visibility = '';
-        authorizeButton.onclick = handleAuthClick;
+        handleAuthClick();
       }
     }
 
-    function handleAuthClick(event) {
+    function handleAuthClick() {
       // Step 3: get authorization to use private data
       gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
       return false;
