@@ -5,25 +5,41 @@
   <title>Document</title>
 </head>
 <body>
+  <!--Add a button for the user to click to initiate auth sequence -->
   <script type="text/javascript">
 
     var clientId = '549978578689-gth04j75b4e3g9tme2a983hni8l50775.apps.googleusercontent.com';
+
     var apiKey = 'AIzaSyCSYzqlibFyFE93jd_amSQTWDzZ54g0Su4';
+
     var scopes = 'https://www.googleapis.com/auth/plus.me';
 
-    function checkAuth(usePopUp) {
-      gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: !usePopUp}, handleAuthResult);
+    function handleClientLoad() {
+      // Step 2: Reference the API key
+      gapi.client.setApiKey(apiKey);
+      window.setTimeout(checkAuth,1);
+    }
+
+    function checkAuth() {
+      gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: true}, handleAuthResult);
     }
 
     function handleAuthResult(authResult) {
+      var authorizeButton = document.getElementById('authorize-button');
       if (authResult && !authResult.error) {
         console.log("we're in!")
       } else {
-        checkAuth(true);
+        handleAuthClick();
       }
+    }
+
+    function handleAuthClick() {
+      // Step 3: get authorization to use private data
+      gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
+      return false;
     }
   </script>
   <!-- Step 1: Load JavaScript client library -->
-  <script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>
+  <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
 </body>
 </html>
