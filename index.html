@@ -15,7 +15,6 @@
     var scopes = 'https://www.googleapis.com/auth/plus.me';
 
     function handleClientLoad() {
-      // Step 2: Reference the API key
       gapi.client.setApiKey(apiKey);
       window.setTimeout(checkAuth,1);
     }
@@ -25,18 +24,17 @@
     }
 
     function handleAuthResult(authResult) {
-      var authorizeButton = document.getElementById('authorize-button');
       if (authResult && !authResult.error) {
         console.log("we're in!")
       } else {
-        handleAuthClick();
+        var clickMe = document.createElement('a');
+        clickMe.onclick = handleAuthClick;
+        document.appendChild(clickMe);
       }
     }
 
     function handleAuthClick() {
-      // Step 3: get authorization to use private data
       gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
-      return false;
     }
   </script>
   <!-- Step 1: Load JavaScript client library -->
