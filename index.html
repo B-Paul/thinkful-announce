@@ -27,7 +27,8 @@
       if (authResult && !authResult.error) {
         console.log("we're in!")
       } else {
-        var clickMe = document.createElement('a');
+        var clickMe = document.createElement('input');
+        clickMe.type = 'button';
         clickMe.onclick = handleAuthClick;
         document.body.appendChild(clickMe);
         clickMe.click();
