@@ -117,9 +117,9 @@ Grid.prototype._addData = function (address, text) {
 };
 
 Grid.prototype.mkRow = function () {
-  var rowData = {};
-  Object.keys(this.cols).forEach(function (key) {
-    var colName = this.cols[key];
+  var rowData = {}, cols = this.cols;
+  Object.keys(cols).forEach(function (key) {
+    var colName = cols[key];
     rowData[colName] = void 0;
   });
   return rowData;
