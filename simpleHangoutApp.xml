@@ -48,26 +48,80 @@ function getData() {
 }
 
 function handleData(data) {
+  var officeHours = new Grid();
   console.log(data);
 
-  var retVal = '<p>Test Data: </p><ul>';
-
   data.feed.entry.forEach(function (cell) {
-    console.log(cell);
-    retVal += '<li>' + cell.title.$t + ': ' + cell.content.$t + '</li>';
+    var text = cell.content.$t, address = cell.title.$t.match(/([A-Z]+)(\d+)/g);
+    address = {
+      col: address[1],
+      row: address[2]
+    };
+    officeHours.add(address, text);
   });
 
-  retVal += '</ul>';
-
+  var retVal = '<p>Test Data: </p><p><code><pre>' + JSON.stringify(officeHours.rows) + '</pre></code></p>';
   var div = document.getElementById('data');
-
   div.innerHTML = retVal;
 }
 
-function postSlack() {
+function Grid() {
+  this.cols = {};
+  this.rows = {};
+  this.add = this._addColumn;
+}
+
+Grid.prototype._addColumn = function (address, text) {
+  var row = address.row, col = address.col;
+  // Use the rows object to keep track of row numbers we've been given.
+  this.rows[row] = this.rows[row];
+
+  // Add column names for each header row
+  if (Object.keys(this.rows).length <= 1) {
+    this.cols[col] = text;
+    return this;
+  }
+
+  // As soon as past the first row, assume all column headers have been given
+  // and switch modes 
+  this.add = this._addData;
+  delete this._addColumn;
+  // Throw away the record of the header row.
+  this.rows = {};
+  return this.add(address, text);
+};
+
+Grid.prototype._addData = function (address, text) {
+  var row = address.row, col = address.col, colName, rowData;
+
+  if ('_addColumn' in this) {
+    return this._addColumn(address, text);
+  } else if (!(col in this.cols)) {
+    throw new Error('no header value for this column');
+  }
+
+  colName = this.cols[col];
+  rowData = this.rows[row] = this.rows[row] || this.mkRow();
+  if (rowData[colName] !== void 0) {
+    throw new Error('overlapping data');
+  }
+
+  rowData[colName] = text;
+  return this;
+};
+
+Grid.prototype.mkRow = function () {
+  var rowData = {};
+  Object.keys(this.cols).forEach(function (key) {
+    var colName = this.cols[key];
+    rowData[colName] = void 0;
+  });
+  return rowData;
+};
+
+function postSlack(message) {
   var token = 'xoxp-2442078175-3326376290-3725937040-91e5d7';
   var opensource = 'C035VHM9B';
-  var message = 'This is a test of the Slack postMessage API method. Please ignore.'
   var url = 'https://slack.com/api/chat.postMessage?token=' + token + '&channel=' + opensource + '&text=' + message;
   var xhr = new XMLHttpRequest();
   xhr.open('GET', url);
@@ -76,21 +130,17 @@ function postSlack() {
 }
 
 function checkSlack(response) {
+  console.log(response);
   var div = document.getElementById('data');
   div.innerHTML = JSON.stringify(response);
 }
 
 function init() {
-  // When API is ready...                                                         
-  gapi.hangout.onApiReady.add(
-      function(eventObj) {
-        if (eventObj.isApiReady) {
-          document.getElementById('getData')
-            .style.visibility = 'visible';
-          document.getElementById('postSlack')
-            .style.visibility = 'visible';
-        }
-      });
+  document.getElementById('getData')
+    .style.visibility = 'visible';
+  document.getElementById('postSlack')
+    .style.visibility = 'visible';
+  getData();
 }
 
 // Wait for gadget to load.                                                       
