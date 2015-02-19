@@ -102,7 +102,7 @@ Grid.prototype._addData = function (address, text) {
   console.log('value:', text);
   var row = address.row, col = address.col, colName, rowData;
 
-  if (this._addColumn === null) {
+  if (this._addColumn !== null) {
     return this._addColumn(address, text);
   } else if (!(col in this.cols)) {
     throw new Error('no header value for this column');
