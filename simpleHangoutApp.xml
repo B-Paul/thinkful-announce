@@ -49,7 +49,7 @@ function handleData(data) {
 
   data.feed.entry.forEach(function (cell) {
     console.log(cell);
-    retVal += '<li>' + cell.title + '</li>';
+    retVal += '<li>' + cell.title.$t + ': ' + cell.content.$t + '</li>';
   });
 
   retVal += '</ul>';
