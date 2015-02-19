@@ -53,7 +53,7 @@ function handleData(data) {
 
   data.feed.entry.forEach(function (cell) {
     console.log('cell title:', cell.title.$t);
-    var text = cell.content.$t, address = cell.title.$t.match(/([A-Z]+)(\d+)/g);
+    var text = cell.content.$t, address = cell.title.$t.match(/([A-Z]+)(\d+)/);
     address = {
       col: address[1],
       row: address[2]
