@@ -77,6 +77,8 @@ Grid.prototype._addColumn = function (address, text) {
   var row = address.row, col = address.col;
   // Use the rows object to keep track of row numbers we've been given.
   this.rows[row] = this.rows[row];
+  console.log('row:', row);
+  console.log('rows:', this.rows);
 
   // Add column names for each header row
   if (Object.keys(this.rows).length <= 1) {
