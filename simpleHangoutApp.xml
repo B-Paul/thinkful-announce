@@ -91,7 +91,7 @@ Grid.prototype._addColumn = function (address, text) {
   // As soon as past the first row, assume all column headers have been given
   // and switch modes 
   this.add = this._addData;
-  delete this._addColumn;
+  this._addColumn = null;
   // Throw away the record of the header row.
   this.rows = {};
   return this.add(address, text);
@@ -102,7 +102,9 @@ Grid.prototype._addData = function (address, text) {
   console.log('value:', text);
   var row = address.row, col = address.col, colName, rowData;
 
-  if (!(col in this.cols)) {
+  if (this._addColumn === null) {
+    return this._addColumn(address, text);
+  } else if (!(col in this.cols)) {
     throw new Error('no header value for this column');
   }
 
