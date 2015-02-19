@@ -31,6 +31,11 @@
     style="visibility:hidden;"
     onClick="getData()"/>
 </p>
+<p>
+<input class="button" type="button" value="Post Test Slack" id="postSlack"
+    style="visibility:hidden;"
+    onclick="postSlack()"/>
+</p>
 
 <div id="data"></div>
 
@@ -59,12 +64,30 @@ function handleData(data) {
   div.innerHTML = retVal;
 }
 
+function postSlack() {
+  var token = 'xoxp-2442078175-3326376290-3725937040-91e5d7';
+  var opensource = 'C035VHM9B';
+  var message = 'This is a test of the Slack postMessage API method. Please ignore.'
+  var url = 'https://slack.com/api/chat.postMessage?token=' + token + '&channel=' + opensource + '&text=' + message;
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url);
+  xhr.onLoad = checkSlack;
+  xhr.send();
+}
+
+function checkSlack(response) {
+  var div = document.getElementById('data');
+  div.innerHTML = JSON.stringify(response);
+}
+
 function init() {
   // When API is ready...                                                         
   gapi.hangout.onApiReady.add(
       function(eventObj) {
         if (eventObj.isApiReady) {
           document.getElementById('getData')
+            .style.visibility = 'visible';
+          document.getElementById('postSlack')
             .style.visibility = 'visible';
         }
       });
