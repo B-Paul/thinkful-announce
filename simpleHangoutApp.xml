@@ -61,7 +61,7 @@ function handleData(data) {
     officeHours.add(address, text);
   });
 
-  var retVal = '<p>Test Data: </p><p><code><pre>' + JSON.stringify(officeHours.rows) + '</pre></code></p>';
+  var retVal = '<p>Test Data: </p><p><code><pre>' + JSON.stringify(officeHours.rows, null, 2) + '</pre></code></p>';
   var div = document.getElementById('data');
   div.innerHTML = retVal;
 }
