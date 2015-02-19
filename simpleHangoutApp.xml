@@ -87,6 +87,7 @@ Grid.prototype._addColumn = function (address, text) {
     return this;
   }
 
+  console.log('going to switch!');
   // As soon as past the first row, assume all column headers have been given
   // and switch modes 
   this.add = this._addData;
