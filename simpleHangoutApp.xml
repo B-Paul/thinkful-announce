@@ -47,7 +47,7 @@ function handleData(data) {
 
   var retVal = '<p>Test Data: </p><ul>';
 
-  for (var index in data.items) {
+  for (var index in data.feed.entry) {
     var cell = data[index];
 
     retVal += '<li>' + cell.title + '</li>';
