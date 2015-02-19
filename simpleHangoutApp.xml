@@ -72,6 +72,8 @@ function Grid() {
 }
 
 Grid.prototype._addColumn = function (address, text) {
+  console.log('column:', address);
+  console.log('value:', text);
   var row = address.row, col = address.col;
   // Use the rows object to keep track of row numbers we've been given.
   this.rows[row] = this.rows[row];
@@ -92,6 +94,8 @@ Grid.prototype._addColumn = function (address, text) {
 };
 
 Grid.prototype._addData = function (address, text) {
+  console.log('data:', address);
+  console.log('value:', text);
   var row = address.row, col = address.col, colName, rowData;
 
   if ('_addColumn' in this) {
