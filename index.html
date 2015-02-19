@@ -5,17 +5,17 @@
   <title>Document</title>
 </head>
 <body>
-  <!--Add a button for the user to click to initiate auth sequence -->
   <script type="text/javascript">
-
     var clientId = '549978578689-gth04j75b4e3g9tme2a983hni8l50775.apps.googleusercontent.com';
+    var scopes = 'https://spreadsheets.google.com/feeds https://docs.google.com/feeds';
 
-    var apiKey = 'AIzaSyCSYzqlibFyFE93jd_amSQTWDzZ54g0Su4';
-
-    var scopes = 'https://www.googleapis.com/auth/plus.me';
-
-    function checkAuth() {
-      gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: true}, handleAuthResult);
+    function authorize(immediate) {
+      var request = {
+        client_id: clientId,
+        scope: scopes,
+        immediate: !!immediate
+      };
+      gapi.auth.authorize(request, handleAuthResult);
     }
 
     function handleAuthResult(authResult) {
@@ -24,15 +24,13 @@
       } else {
         var clickMe = document.createElement('input');
         clickMe.type = 'button';
-        clickMe.onclick = handleAuthClick;
+        clickMe.onclick = authorize;
         document.body.appendChild(clickMe);
         clickMe.click();
       }
     }
 
-    function handleAuthClick() {
-      gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
-    }
+    var checkAuth = authorize.bind(null, true);
   </script>
   <!-- Step 1: Load JavaScript client library -->
   <script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>
