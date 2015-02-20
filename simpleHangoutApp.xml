@@ -194,16 +194,25 @@ function checkSlack(response) {
 
 function postSlack_() {
   var hangout = nextByTime(officeHours.rows);
-  var timeLeft = Math.floor((hangout.start - new Date()) / 1000 * 60)
-  var message = 'Test message: '
+  var timeLeft = Math.floor((hangout.start - new Date()) / (1000 * 60))
+  var message = 'Test message: ';
   if (timeLeft < 0) {
-    message += 'Office hours on now with '
+    message += 'Office hours on now with ';
     message += hangout['Host'];
   } else {
-    message += 'The next office hours session will be in '
-    message += timeLeft + ' minutes '
-    message += 'with '
+    message += 'The next office hours session will be in ';
+    message += timeLeft + ' minutes ';
+    message += 'with ';
     message += hangout['Host'];
+    message += '\n\nCurrent hangout participants:';
+    gapi.hangout.getParticipants().forEach(function (participant) {
+      message += '\n'
+      if (!participant.person) {
+        message += 'Unknown';
+      } else {
+        message += participant.person.displayName;
+      }
+    });
   }
   postSlack(message, 'C035VHM9B');
 }
