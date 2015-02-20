@@ -190,6 +190,7 @@ function postSlack_() {
   var message = 'Test message: '
   message += 'The next office hours will be: \n'
   message += JSON.stringify(nextByTime(officeHours.rows));
+  console.log(nextByTime(officeHours.rows));
   postSlack(message, 'C035VHM9B');
 }
 
