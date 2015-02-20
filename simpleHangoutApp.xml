@@ -22,14 +22,35 @@
 <html>
 <style>
 
-<!-- TODO: styles -->
+#info {
+  font-size: .6em;
+  color: #b4b4bd;
+}
+
+#controls, #timer {
+  min-height: 2.5em;
+}
+
+.button {
+  background-color: #427fed;
+  color: white;
+  line-height: 28px;
+}
+
+#controls label {
+  font-size: .6em;
+}
+
+#time-left {
+  font-size: 1.75em;
+}
 
 </style>
 <body>
 
 <script src="//plus.google.com/hangouts/_/api/v1/hangout.js"></script>
 
-<h3>Simple Hangout App</h3>
+<h3>Office Hours Announcer</h3>
 
 <p id="info">If office hours are in session, bot will post the display names of
 participants to all channels. If not, it will post a time until the next session
