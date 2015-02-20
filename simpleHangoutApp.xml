@@ -27,11 +27,6 @@
 <h3>Simple Hangout App</h3>
 
 <p>
-<input class="button" type="button" value="Get Test Data" id="getData" 
-    style="visibility:hidden;"
-    onClick="getData()"/>
-</p>
-<p>
 <input class="button" type="button" value="Post Test Slack" id="postSlack"
     style="visibility:hidden;"
     onclick="postSlack()"/>
@@ -40,32 +35,7 @@
 <div id="data"></div>
 
 <script>
-function getData() {
-  console.log('getData called');
-  var script = document.createElement('script');
-  script.src = '//spreadsheets.google.com/feeds/cells/1dbQ5XLk8k83b1Za3Ugmp4PW-9QKaW9j46Pmd0fLT96Y/od6/public/basic?alt=json-in-script&callback=handleData';
-  document.body.appendChild(script);
-}
-
-function handleData(data) {
-  var officeHours = new Grid();
-  console.log(data);
-
-  data.feed.entry.forEach(function (cell) {
-    console.log('cell title:', cell.title.$t);
-    var text = cell.content.$t, address = cell.title.$t.match(/([A-Z]+)(\d+)/);
-    address = {
-      col: address[1],
-      row: address[2]
-    };
-    officeHours.add(address, text);
-  });
-
-  var retVal = '<p>Test Data: </p><p><code><pre>' + JSON.stringify(officeHours.rows, null, 2) + '</pre></code></p>';
-  var div = document.getElementById('data');
-  div.innerHTML = retVal;
-}
-
+// Object type to hold the spreadsheet data
 function Grid() {
   this.cols = {};
   this.rows = {};
@@ -127,14 +97,72 @@ Grid.prototype.mkRow = function () {
   return rowData;
 };
 
+var officeHours = new Grid();
+
+function parseSpreadsheetCells(data) {
+  var hangout;
+  console.log(data);
+
+  data.feed.entry.forEach(function (cell) {
+    console.log('cell title:', cell.title.$t);
+    var text = cell.content.$t.trim(),
+        address = cell.title.$t.match(/([A-Z]+)(\d+)/);
+    address = {
+      col: address[1],
+      row: address[2]
+    };
+    officeHours.add(address, text);
+  });
+
+  Object.keys(officeHours.rows).sort().forEach(function (rowNum) {
+    var row = officeHours.rows[rowNum], props = {}, date, time, start, end;
+
+    // Make a new object with all the properties of the current row, the proto-
+    // type of which is the object created in this way from the previous row.
+    // This is to cover any columns that are missing from a particular row.
+    Object.keys(row).forEach(function (key) {
+      props[key] = {value: row[key]};
+    });
+    hangout = Object.create(hangout, props);
+
+    date = nextOfWeekday(hangout['Day']).toDateString();
+    time = hangout['Time (EST)'].split('-');
+    start = time[0].trim();
+    end = time[1].trim();
+    hangout.start = new Date(date + start);
+    hangout.end = new Date(date + end);
+
+    officeHours.rows[rowNum] = hangout;
+  });
+
+  document.dispatchEvent(new Event('tf-hangoutsready'));
+}
+
+function nextOfWeekday(wkdayName) {
+  var date = new Date(), targetDay = {
+    'Sunday':    0,
+    'Monday':    1,
+    'Tuesday':   2,
+    'Wednesday': 3,
+    'Thursday':  4,
+    'Friday':    5,
+    'Saturday':  6
+  }[wkdayName];
+  while (date.getDay() !== targetDay) {
+    date.setDate(date.getDate + 1);
+  }
+  return date;
+}
+
 function postSlack(message) {
-  var token = 'xoxp-2442078175-3326376290-3725937040-91e5d7';
-  var opensource = 'C035VHM9B';
-  var url = 'https://slack.com/api/chat.postMessage?token=' + token + '&channel=' + opensource + '&text=' + message;
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', url);
-  xhr.onLoad = checkSlack;
-  xhr.send();
+  // var token = 'xoxp-2442078175-3326376290-3725937040-91e5d7';
+  // var opensource = 'C035VHM9B';
+  // var url = 'https://slack.com/api/chat.postMessage?token=' + token + '&channel=' + opensource + '&text=' + message;
+  // var xhr = new XMLHttpRequest();
+  // xhr.open('GET', url);
+  // xhr.onLoad = checkSlack;
+  // xhr.send();
+  console.log(officeHours.rows);
 }
 
 function checkSlack(response) {
@@ -144,12 +172,18 @@ function checkSlack(response) {
 }
 
 function init() {
-  document.getElementById('getData')
-    .style.visibility = 'visible';
-  document.getElementById('postSlack')
-    .style.visibility = 'visible';
-  getData();
+  document.addEventListener('tf-hangoutsready', function () {
+    document.getElementById('postSlack').style.visibility = 'visible';
+  });
 }
+
+(function () {
+  var script = document.createElement('script');
+  script.src = '//spreadsheets.google.com/feeds/cells/'
+    + '1dbQ5XLk8k83b1Za3Ugmp4PW-9QKaW9j46Pmd0fLT96Y/od6'
+    + '/public/basic?alt=json-in-script&callback=parseSpreadsheetCells';
+  document.body.appendChild(script);
+}());
 
 // Wait for gadget to load.                                                       
 gadgets.util.registerOnLoadHandler(init);
