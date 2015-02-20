@@ -22,9 +22,13 @@
 <html>
 <style>
 
+body {
+  padding: .8em;
+}
+
 #info {
-  font-size: .6em;
-  color: #b4b4bd;
+  font-size: .8em;
+  color: #40404b;
 }
 
 #controls, #timer {
@@ -35,13 +39,13 @@
   border: none;
   background-color: #427fed;
   color: white;
-  line-height: 20px;
-  padding: 4px;
-  font-size: 1.15em;
+  line-height: 14px;
+  padding: 7px;
+  font-size: .9em;
 }
 
 #controls label {
-  font-size: .6em;
+  font-size: .8em;
 }
 
 #time-left {
