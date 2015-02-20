@@ -118,10 +118,11 @@ function parseSpreadsheetCells(data) {
     hangout = Object.create(hangout, props);
 
     console.log(hangout);
-    date = nextOfWeekday(hangout['Day']).toDateString();
-    timezone = date.getTimezoneOffset() === jan1.getTimezoneOffset()
+    date = nextOfWeekday(hangout['Day']);
+    timezone = date.getTimezoneOffset() === jan1().getTimezoneOffset()
       ? 'EST'
       : 'EDT';
+    date = date.toDateString();
     time = hangout['Time (EST)'].split('-');
     start = time[0].trim();
     end = time[1].trim();
