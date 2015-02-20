@@ -164,17 +164,19 @@ function nextByTime(map) {
   var times = Object.keys(map), now = new Date().getTime();
   times.push(now);
   times = times.sort();
-  return map[times.indexOf(now) + 1];
+  return map[times[times.indexOf(now) + 1]];
 }
 
-function postSlack(message) {
+function postSlack(message, channel) {
   // var token = 'xoxp-2442078175-3326376290-3725937040-91e5d7';
-  // var opensource = 'C035VHM9B';
-  // var url = 'https://slack.com/api/chat.postMessage?token=' + token + '&channel=' + opensource + '&text=' + message;
+  // var url = 'https://slack.com/api/chat.postMessage';
   // var xhr = new XMLHttpRequest();
-  // xhr.open('GET', url);
+  // xhr.open('POST', url);
   // xhr.onload = checkSlack;
-  // xhr.send();
+  // xhr.send(
+  //   'token=' + token
+  //   + '&channel=' + channel
+  //   + '&text=' + message);
   console.log(message);
 }
 
@@ -188,7 +190,7 @@ function postSlack_() {
   var message = 'Test message: '
   message += 'The next office hours will be: \n'
   message += JSON.stringify(nextByTime(officeHours.rows));
-  postSlack(message);
+  postSlack(message, 'C035VHM9B');
 }
 
 function init() {
