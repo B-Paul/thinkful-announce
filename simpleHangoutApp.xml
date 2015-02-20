@@ -234,6 +234,7 @@ function parseSlackChannels() {
     elem.style.display = 'inline-block';
     elem.style.width = '40%';
     elem.style.paddingLeft = '5%';
+    elem.style.whiteSpace = 'nowrap';
     elem.style.overflow = 'hidden';
     cbox.type = 'checkbox';
     cbox.class = 'channel';
