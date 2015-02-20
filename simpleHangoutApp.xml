@@ -294,7 +294,7 @@ function init() {
       document.getElementById('postSlack').style.visibility = 'visible';
       statusContainer.innerHTML = 'Ready';
     }
-  });
+  };
 }
 
 // Wait for gadget to load.                                                       
