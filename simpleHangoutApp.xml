@@ -172,9 +172,10 @@ function parseSpreadsheetCells(data) {
 
 var channels;
 
-function parseSlackChannels(response) {
-  console.log(response);
-  channels = response.channels.map(function (c) { return c.id; });
+function parseSlackChannels() {
+  console.log(this);
+  channels = JSON.parse(this.responseText)
+    .channels.map(function (c) { return c.id; });
   document.dispatchEvent(new Event('tf-chanlistready'));
 }
 
@@ -283,7 +284,7 @@ function init() {
   xhr.open('GET', 'https://slack.com/api/channels.list'
     + '?token=' + slackToken
     + '&exclude_archived=1');
-  xhr.onload = parseSlackChannels;
+  xhr.onload = parseSlackChannels.bind(xhr);
   xhr.send();
 
   document.addEventListener('tf-hangoutsready', revealUI);
