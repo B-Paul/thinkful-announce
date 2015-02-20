@@ -137,7 +137,7 @@ function parseSpreadsheetCells(data) {
   function jan1() {
     var d = new Date();
     d.setMonth(0);
-    d.setDay(1);
+    d.setDate(1);
     return d;
   }
 }
