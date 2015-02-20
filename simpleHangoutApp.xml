@@ -175,14 +175,16 @@ function nextByTime(map) {
 
 function postSlack(message, channel) {
   var token = 'xoxp-2442078175-3326376290-3725937040-91e5d7';
-  var url = 'https://slack.com/api/chat.postMessage'
-    + '?token=' + token
-    + '&channel=' + channel
-    + '&text=' + message;
+  var url = 'https://slack.com/api/chat.postMessage';
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', url);
+  xhr.open('POST', url);
+  xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
   xhr.onload = checkSlack;
-  xhr.send();
+  xhr.send(JSON.stringify({
+    token: token,
+    channel: channel,
+    text: message
+  }));
 }
 
 function checkSlack(response) {
