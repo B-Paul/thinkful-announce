@@ -68,8 +68,8 @@ h5 {
 .channel {
   display: inline-block;
   width: 40%;
-  paddingLeft: 5%;
-  whiteSpace: nowrap;
+  padding-left: 5%;
+  white-space: nowrap;
   overflow: hidden;
 }
 
