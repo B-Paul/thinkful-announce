@@ -288,6 +288,8 @@ function announce() {
   }
 
   statusContainer.innerHTML = '';
+  console.log('ready to loop');
+  console.log(document.querySelectorAll('.channel'));
 
   [].forEach.call(document.querySelectorAll('.channel'), function (elem) {
     var cbox = elem.querySelector('input'),
