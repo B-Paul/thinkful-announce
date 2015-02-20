@@ -24,6 +24,7 @@
 
 body {
   padding: .8em;
+  overflow-y: scroll;
 }
 
 #info {
