@@ -174,16 +174,15 @@ function nextByTime(map) {
 }
 
 function postSlack(message, channel) {
-  // var token = 'xoxp-2442078175-3326376290-3725937040-91e5d7';
-  // var url = 'https://slack.com/api/chat.postMessage';
-  // var xhr = new XMLHttpRequest();
-  // xhr.open('POST', url);
-  // xhr.onload = checkSlack;
-  // xhr.send(
-  //   'token=' + token
-  //   + '&channel=' + channel
-  //   + '&text=' + message);
-  console.log(message);
+  var token = 'xoxp-2442078175-3326376290-3725937040-91e5d7';
+  var url = 'https://slack.com/api/chat.postMessage';
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', url);
+  xhr.onload = checkSlack;
+  xhr.send(
+    'token=' + token
+    + '&channel=' + channel
+    + '&text=' + message);
 }
 
 function checkSlack(response) {
@@ -199,13 +198,8 @@ function postSlack_() {
   if (timeLeft < 0) {
     message += 'Office hours on now with ';
     message += hangout['Host'];
-  } else {
-    message += 'The next office hours session will be in ';
-    message += timeLeft + ' minutes ';
-    message += 'with ';
-    message += hangout['Host'];
     message += '\n\nCurrent hangout participants:';
-    gapi.hangout.getParticipants().forEach(function (participant) {
+    getParticipants().forEach(function (participant) {
       message += '\n'
       if (!participant.person) {
         message += 'Unknown';
@@ -213,8 +207,18 @@ function postSlack_() {
         message += participant.person.displayName;
       }
     });
+  } else {
+    message += 'The next office hours session will be in ';
+    message += timeLeft + ' minutes ';
+    message += 'with ';
+    message += hangout['Host'];
   }
   postSlack(message, 'C035VHM9B');
+}
+
+function getParticipants() {
+  // TODO: make sure that the hangout is the actual thinkful channel
+  return gapi.hangout.getParticipants();
 }
 
 function init() {
