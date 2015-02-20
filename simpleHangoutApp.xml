@@ -112,7 +112,7 @@ function parseSpreadsheetCells(data) {
     // type of which is the object created in this way from the previous row.
     // This is to cover any columns that are missing from a particular row.
     Object.keys(row).forEach(function (key) {
-      if (props[key] !== void 0) { props[key] = {value: row[key]}; }
+      if (row[key] !== void 0) { props[key] = {value: row[key]}; }
     });
     hangout = Object.create(hangout, props);
 
