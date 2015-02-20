@@ -35,6 +35,14 @@ body {
   min-height: 2.5em;
 }
 
+#controls {
+  visibility: hidden;
+}
+
+#timer {
+  display: none;
+}
+
 .button {
   border: none;
   background-color: #427fed;
@@ -49,6 +57,7 @@ body {
 }
 
 h5 {
+  margin-top: 1.4em;
   margin-bottom: .6em;
 }
 
@@ -68,10 +77,10 @@ h5 {
 <h3>Office Hours Announcer</h3>
 
 <p id="info">If office hours are in session, bot will post the display names of
-participants to all channels. If not, it will post a time until the next session
-instead.</p>
+participants to the specified channels. If not, it will post a time until the
+next session instead.</p>
 
-<div id="controls" style="visibility:hidden;">
+<div id="controls">
   <input class="button" type="button" value="Post to Slack" id="postSlack"
       onclick="announce()" />
   <input type="checkbox" id="repost" checked="checked" />
@@ -81,7 +90,7 @@ instead.</p>
   <div id="channels"></div>
 </div>
 
-<div id="timer" style="display:none;">
+<div id="timer">
   <p>Auto post in: <span id="time-left"></span></p>
   <input class="button" type="button" value="Pause" id="pauseTimer" />
   <input class="button" type="button" value="Stop" id="stopTimer" />
@@ -254,6 +263,7 @@ function announce() {
   var timeLeft = Math.floor((hangout.start - new Date()) / (1000 * 60))
   var message = '';
   var participants;
+
   if (timeLeft < 0) {
     message += 'Office hours on now with ';
     message += hangout['Host'];
@@ -276,9 +286,19 @@ function announce() {
     message += 'with ';
     message += hangout['Host'];
   }
+
   statusContainer.innerHTML = '';
-  postSlack(message, 'C035VHM9B');
-  // TODO: get checked channels
+
+  [].forEach.call(document.querySelectorAll('.channel'), function (elem) {
+    var cbox = elem.querySelector('input'),
+      label = elem.querySelector('label');
+    if (cbox.checked) {
+      console.log('message =', message);
+      console.log('id =', cbox.id);
+      console.log('name =', label.innerText);
+      // postSlack(message, cbox.id, label.innerText);
+    }
+  });
   // TODO: set up a timer to repeat the message
 }
 
@@ -296,7 +316,7 @@ function nextByTime(map) {
   return hangout;
 }
 
-function postSlack(message, channel) {
+function postSlack(message, channel, channelName) {
   message = JSON.stringify([{
     fallback: message,
     pretext: 'http://office-hours.thinkful.com/',
@@ -304,7 +324,7 @@ function postSlack(message, channel) {
   }]);
 
   var status = document.createElement('p');
-  status.innerHTML = 'Posting to channel ' + channel + ':';
+  status.innerHTML = 'Posting to ' + channelName + ':';
   statusContainer.appendChild(status);
   var callback = function (response) {
     var result = document.createElement('span');
