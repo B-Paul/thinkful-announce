@@ -20,18 +20,33 @@
 	<Content type="html"><![CDATA[
 
 <html>
+<style>
+
 <!-- TODO: styles -->
+
+</style>
 <body>
 
 <script src="//plus.google.com/hangouts/_/api/v1/hangout.js"></script>
 
 <h3>Simple Hangout App</h3>
 
-<input class="button" type="button" value="Post Test Slack" id="postSlack"
-    style="visibility:hidden;"
-    onclick="announce()"/>
+<p id="info">If office hours are in session, bot will post the display names of
+participants to all channels. If not, it will post a time until the next session
+instead.</p>
 
-<div id="timer"></div>
+<div id="controls" style="visibility:hidden;">
+  <input class="button" type="button" value="Post to Slack" id="postSlack"
+      onclick="announce()" />
+  <input type="checkbox" id="repost" />
+  <label for="repost">Post again in 15 minutes</label>
+</div>
+
+<div id="timer" style="display:none;">
+  <p>Auto post in: <span id="time-left"></span></p>
+  <input class="button" type="button" value="Pause" id="pauseTimer" />
+  <input class="button" type="button" value="Stop" id="stopTimer" />
+</div>
 
 <div id="status"></div>
 
@@ -293,7 +308,7 @@ function init() {
   function revealUI() {
     readyEvents ++;
     if (readyEvents === 2) {
-      document.getElementById('postSlack').style.visibility = 'visible';
+      document.getElementById('controls').style.visibility = 'visible';
       statusContainer.innerHTML = 'Ready';
     }
   };
