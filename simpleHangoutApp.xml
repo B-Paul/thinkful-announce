@@ -70,8 +70,11 @@ instead.</p>
 <div id="controls" style="visibility:hidden;">
   <input class="button" type="button" value="Post to Slack" id="postSlack"
       onclick="announce()" />
-  <input type="checkbox" id="repost" />
+  <input type="checkbox" id="repost" checked="checked" />
   <label for="repost">Post again in 15 minutes</label>
+
+  <h5>Channels</h5>
+  <div id="channels"></div>
 </div>
 
 <div id="timer" style="display:none;">
@@ -87,6 +90,7 @@ var spreadsheetId = '1dbQ5XLk8k83b1Za3Ugmp4PW-9QKaW9j46Pmd0fLT96Y/od6';
 var slackToken = 'xoxp-2442078175-3326376290-3725937040-91e5d7';
 var officeHoursHangout = 'https://plus.google.com/hangouts/_/event/c27caov1if6tvbkjn7473q7v0v4';
 var statusContainer = document.getElementById('status');
+var channelsContainer = document.getElementById('channels');
 
 // Object type to hold the spreadsheet data
 function Grid() {
@@ -217,12 +221,23 @@ function parseSpreadsheetCells(data) {
   }
 }
 
-var channels;
-
 function parseSlackChannels() {
-  console.log(this);
-  channels = JSON.parse(this.responseText)
-    .channels.map(function (c) { return c.id; });
+  var container = channelsContainer;
+  JSON.parse(this.responseText).channels.forEach(function (channel) {
+    var elem = document.createElement('div'),
+      cbox = document.createElement('input'),
+      label = document.createElement('label');
+    elem.style.display = 'inline-block';
+    cbox.type = 'checkbox';
+    cbox.class = 'channel';
+    cbox.checked = true;
+    cbox.id = channel.id;
+    label.htmlFor = channel.id;
+    label.innerHTML = channel.name;
+    elem.appendChild(cbox);
+    elem.appendChild(label);
+    container.appendChild(elem);
+  });
   document.dispatchEvent(new Event('tf-chanlistready'));
 }
 
@@ -255,7 +270,7 @@ function announce() {
   }
   statusContainer.innerHTML = '';
   postSlack(message, 'C035VHM9B');
-  console.log(channels); // TODO: broadcast to all channelss
+  // TODO: get checked channels
   // TODO: set up a timer to repeat the message
 }
 
