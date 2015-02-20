@@ -163,18 +163,15 @@ function checkSlack(response) {
 }
 
 function init() {
-  document.addEventListener('tf-hangoutsready', function () {
-    document.getElementById('postSlack').style.visibility = 'visible';
-  });
-}
-
-(function () {
   var script = document.createElement('script');
   script.src = '//spreadsheets.google.com/feeds/cells/'
     + '1dbQ5XLk8k83b1Za3Ugmp4PW-9QKaW9j46Pmd0fLT96Y/od6'
     + '/public/basic?alt=json-in-script&callback=parseSpreadsheetCells';
   document.body.appendChild(script);
-}());
+  document.addEventListener('tf-hangoutsready', function () {
+    document.getElementById('postSlack').style.visibility = 'visible';
+  });
+}
 
 // Wait for gadget to load.                                                       
 gadgets.util.registerOnLoadHandler(init);
