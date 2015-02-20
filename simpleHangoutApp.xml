@@ -121,8 +121,8 @@ function parseSpreadsheetCells(data) {
     time = hangout['Time (EST)'].split('-');
     start = time[0].trim();
     end = time[1].trim();
-    hangout.start = new Date(date + start);
-    hangout.end = new Date(date + end);
+    hangout.start = new Date(date + ' ' + start);
+    hangout.end = new Date(date + ' ' + end);
 
     officeHours.rows[rowNum] = hangout;
   });
