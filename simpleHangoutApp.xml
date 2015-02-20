@@ -106,18 +106,17 @@ function parseSpreadsheetCells(data) {
   });
 
   Object.keys(officeHours.rows).sort().forEach(function (rowNum) {
-    var row = officeHours.rows[rowNum], props = {},
-      date, timezone, time, start, end;
+    var row = officeHours.rows[rowNum], date, timezone, time, start, end;
 
     delete officeHours.rows[rowNum];
 
     // Make a new object with all the properties of the current row, the proto-
     // type of which is the object created in this way from the previous row.
     // This is to cover any columns that are missing from a particular row.
+    hangout = Object.create(hangout);
     Object.keys(row).forEach(function (key) {
-      if (row[key] !== void 0) { props[key] = {value: row[key]}; }
+      if (row[key] !== void 0) { hangout[key] = row[key]; }
     });
-    hangout = Object.create(hangout, props);
 
     date = nextOfWeekday(hangout['Day']);
     timezone = date.getTimezoneOffset() === jan1().getTimezoneOffset()
@@ -161,10 +160,17 @@ function nextOfWeekday(wkdayName) {
 }
 
 function nextByTime(map) {
-  var times = Object.keys(map), now = new Date().getTime();
+  var times = Object.keys(map), now = new Date().getTime(),
+    lastStart, nextStart, hangout;
   times.push(now);
   times = times.sort();
-  return map[times[times.indexOf(now) + 1]];
+  lastStart = times[times.indexOf(now) - 1];
+  nextStart = times[times.indexOf(now) + 1];
+
+  hangout = map[lastStart];
+  if (hangout.end.getTime() < now) { hangout = map[nextStart]; }
+
+  return hangout;
 }
 
 function postSlack(message, channel) {
@@ -187,10 +193,18 @@ function checkSlack(response) {
 }
 
 function postSlack_() {
+  var hangout = nextByTime(officeHours.rows);
+  var timeLeft = Math.floor((hangout.start() - new Date()) / 1000 * 60)
   var message = 'Test message: '
-  message += 'The next office hours will be: \n'
-  message += JSON.stringify(nextByTime(officeHours.rows));
-  console.log(nextByTime(officeHours.rows));
+  if (timeLeft < 0) {
+    message += 'Office hours on now with '
+    message += hangout['Host'];
+  } else {
+    message += 'The next office hours session will be in '
+    message += timeLeft + ' minutes '
+    message += 'with '
+    message += hangout['Host'];
+  }
   postSlack(message, 'C035VHM9B');
 }
 
