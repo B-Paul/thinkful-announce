@@ -65,6 +65,14 @@ h5 {
   font-size: 1.75em;
 }
 
+.channel {
+  display: inline-block;
+  width: 40%;
+  paddingLeft: 5%;
+  whiteSpace: nowrap;
+  overflow: hidden;
+}
+
 #status {
   padding-top: 1em;
 }
@@ -240,13 +248,8 @@ function parseSlackChannels() {
     var elem = document.createElement('div'),
       cbox = document.createElement('input'),
       label = document.createElement('label');
-    elem.style.display = 'inline-block';
-    elem.style.width = '40%';
-    elem.style.paddingLeft = '5%';
-    elem.style.whiteSpace = 'nowrap';
-    elem.style.overflow = 'hidden';
+    elem.className = 'channel';
     cbox.type = 'checkbox';
-    cbox.class = 'channel';
     cbox.checked = true;
     cbox.id = channel.id;
     label.htmlFor = channel.id;
@@ -331,10 +334,10 @@ function postSlack(message, channel, channelName) {
   var callback = function (response) {
     var result = document.createElement('span');
     if (!response.ok || response.error != null) {
-      result.class = 'result failure';
+      result.className = 'result failure';
       result.innerHTML = response.error;
     } else {
-      result.class = 'result sucess';
+      result.className = 'result sucess';
       result.innerHTML = 'OK';
     }
     status.appendChild(result);
