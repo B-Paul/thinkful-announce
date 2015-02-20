@@ -24,7 +24,6 @@
 
 body {
   padding: .8em;
-  overflow-y: scroll;
 }
 
 #info {
@@ -47,6 +46,10 @@ body {
 
 #controls label {
   font-size: .8em;
+}
+
+h5 {
+  margin-bottom: .6em;
 }
 
 #time-left {
@@ -229,6 +232,9 @@ function parseSlackChannels() {
       cbox = document.createElement('input'),
       label = document.createElement('label');
     elem.style.display = 'inline-block';
+    elem.style.width = '40%';
+    elem.style.padding-left: '5%';
+    elem.style.overflow: 'hidden';
     cbox.type = 'checkbox';
     cbox.class = 'channel';
     cbox.checked = true;
