@@ -139,8 +139,9 @@ function nextOfWeekday(wkdayName) {
     'Friday':    5,
     'Saturday':  6
   }[wkdayName];
+  if (isNaN(+targetDay)) { throw new Error('Bad weekday name'); }
   while (date.getDay() !== targetDay) {
-    date.setDate(date.getDate + 1);
+    date.setDate(date.getDate() + 1);
   }
   return date;
 }
