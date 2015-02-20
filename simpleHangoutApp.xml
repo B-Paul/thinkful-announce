@@ -20,21 +20,27 @@
 	<Content type="html"><![CDATA[
 
 <html>
+<!-- TODO: styles -->
 <body>
 
 <script src="//plus.google.com/hangouts/_/api/v1/hangout.js"></script>
 
 <h3>Simple Hangout App</h3>
 
-<p>
 <input class="button" type="button" value="Post Test Slack" id="postSlack"
     style="visibility:hidden;"
-    onclick="postSlack_()"/>
-</p>
+    onclick="announce()"/>
 
-<div id="data"></div>
+<div id="timer"></div>
+
+<div id="status"></div>
 
 <script>
+var spreadsheetId = '1dbQ5XLk8k83b1Za3Ugmp4PW-9QKaW9j46Pmd0fLT96Y/od6';
+var slackToken = 'xoxp-2442078175-3326376290-3725937040-91e5d7';
+var officeHoursHangout = 'https://plus.google.com/hangouts/_/event/c27caov1if6tvbkjn7473q7v0v4';
+var statusContainer = document.getElementById('status');
+
 // Object type to hold the spreadsheet data
 function Grid() {
   this.cols = {};
@@ -90,10 +96,12 @@ Grid.prototype.mkRow = function () {
   return rowData;
 };
 
-var officeHours = new Grid();
+var officeHours;
 
 function parseSpreadsheetCells(data) {
   var hangout = Object.prototype;
+
+  officeHours = new Grid();
 
   data.feed.entry.forEach(function (cell) {
     var text = cell.content.$t.trim(),
@@ -118,6 +126,7 @@ function parseSpreadsheetCells(data) {
       if (row[key] !== void 0) { hangout[key] = row[key]; }
     });
 
+    // Calculate the start and end times
     date = nextOfWeekday(hangout['Day']);
     timezone = date.getTimezoneOffset() === jan1().getTimezoneOffset()
       ? 'EST'
@@ -129,10 +138,29 @@ function parseSpreadsheetCells(data) {
     hangout.start = start = new Date([date, start, timezone].join(' '));
     hangout.end = end = new Date([date, end, timezone].join(' '));
 
+    // Add the hangout info back into rows by start time (Allows comparison to
+    // the current time)
     officeHours.rows[hangout.start.getTime()] = hangout;
   });
 
   document.dispatchEvent(new Event('tf-hangoutsready'));
+
+  function nextOfWeekday(wkdayName) {
+    var date = new Date(), targetDay = {
+      'Sunday':    0,
+      'Monday':    1,
+      'Tuesday':   2,
+      'Wednesday': 3,
+      'Thursday':  4,
+      'Friday':    5,
+      'Saturday':  6
+    }[wkdayName];
+    if (isNaN(+targetDay)) { throw new Error('Bad weekday name'); }
+    while (date.getDay() !== targetDay) {
+      date.setDate(date.getDate() + 1);
+    }
+    return date;
+  }
 
   function jan1() {
     var d = new Date();
@@ -142,21 +170,44 @@ function parseSpreadsheetCells(data) {
   }
 }
 
-function nextOfWeekday(wkdayName) {
-  var date = new Date(), targetDay = {
-    'Sunday':    0,
-    'Monday':    1,
-    'Tuesday':   2,
-    'Wednesday': 3,
-    'Thursday':  4,
-    'Friday':    5,
-    'Saturday':  6
-  }[wkdayName];
-  if (isNaN(+targetDay)) { throw new Error('Bad weekday name'); }
-  while (date.getDay() !== targetDay) {
-    date.setDate(date.getDate() + 1);
+var channels;
+
+function parseSlackChannels(response) {
+  channels = response.channels.map(function (c) { return c.id; });
+  document.dispatchEvent(new Event('tf-chanlistready'));
+}
+
+function announce() {
+  var hangout = nextByTime(officeHours.rows);
+  var timeLeft = Math.floor((hangout.start - new Date()) / (1000 * 60))
+  var message = '';
+  var participants;
+  if (timeLeft < 0) {
+    message += 'Office hours on now with ';
+    message += hangout['Host'];
+    message += '\nTime slot: ' + hangout['Time (EST)'];
+    participants = getParticipants();
+    if (participants.length) {
+      message += '\nCurrent hangout participants:';
+      getParticipants().forEach(function (participant) {
+        message += '\n'
+        if (!participant.person) {
+          message += 'Unknown';
+        } else {
+          message += participant.person.displayName;
+        }
+    }
+    });
+  } else {
+    message += 'The next office hours session will be in ';
+    message += timeLeft + ' minutes ';
+    message += 'with ';
+    message += hangout['Host'];
   }
-  return date;
+  statusContainer.innerHTML = '';
+  postSlack(message, 'C035VHM9B');
+  console.log(channels); // TODO: broadcast to all channelss
+  // TODO: set up a timer to repeat the message
 }
 
 function nextByTime(map) {
@@ -176,65 +227,73 @@ function nextByTime(map) {
 function postSlack(message, channel) {
   message = JSON.stringify([{
     fallback: message,
-    pretext: 'Test message',
+    pretext: 'http://office-hours.thinkful.com/',
     text: message.replace('\n', '\\n')
   }]);
 
-  var token = 'xoxp-2442078175-3326376290-3725937040-91e5d7';
+  var status = document.createElement('p');
+  status.innerHTML = 'Posting to channel ' + channel + ':';
+  statusContainer.appendChild(status);
+  var callback = function (response) {
+    var result = document.createElement('span');
+    if (!response.ok || response.error != null) {
+      result.class = 'result failure';
+      result.innerHTML = response.error;
+    } else {
+      result.class = 'result sucess';
+      result.innerHTML = 'OK';
+    }
+    status.appendChild(result);
+  };
+
   var url = 'https://slack.com/api/chat.postMessage'
-    + '?token=' + token
+    + '?token=' + slackToken
     + '&channel=' + channel
     + '&attachments=' + message;
   var xhr = new XMLHttpRequest();
   xhr.open('GET', url);
-  xhr.onload = checkSlack;
+  xhr.onload = callback;
   xhr.send();
 }
 
-function checkSlack(response) {
-  console.log(response);
-  var div = document.getElementById('data');
-  div.innerHTML = JSON.stringify(response);
-}
-
-function postSlack_() {
-  var hangout = nextByTime(officeHours.rows);
-  var timeLeft = Math.floor((hangout.start - new Date()) / (1000 * 60))
-  var message = 'Test message: ';
-  if (timeLeft < 0) {
-    message += 'Office hours on now with ';
-    message += hangout['Host'];
-    message += '\n\nCurrent hangout participants:';
-    getParticipants().forEach(function (participant) {
-      message += '\n'
-      if (!participant.person) {
-        message += 'Unknown';
-      } else {
-        message += participant.person.displayName;
-      }
-    });
-  } else {
-    message += 'The next office hours session will be in ';
-    message += timeLeft + ' minutes ';
-    message += 'with ';
-    message += hangout['Host'];
-  }
-  postSlack(message, 'C035VHM9B');
-}
-
 function getParticipants() {
-  // TODO: make sure that the hangout is the actual thinkful channel
+  if (gapi.hangout.getHangoutUrl() !== officeHoursHangout) {
+    console.error("Url doesn't match the expected office hours location");
+    console.error(gapi.hangout.getHangoutUrl());
+    return [];
+  }
   return gapi.hangout.getParticipants();
 }
 
 function init() {
+  var readyEvents = 0;
+
+  statusContainer.innerHTML = 'Loading resources...';
+
+  // This is a JSONP call
   var script = document.createElement('script');
-  script.src = '//spreadsheets.google.com/feeds/cells/'
-    + '1dbQ5XLk8k83b1Za3Ugmp4PW-9QKaW9j46Pmd0fLT96Y/od6'
+  script.src = '//spreadsheets.google.com/feeds/cells/' + spreadsheetId
     + '/public/basic?alt=json-in-script&callback=parseSpreadsheetCells';
   document.body.appendChild(script);
-  document.addEventListener('tf-hangoutsready', function () {
-    document.getElementById('postSlack').style.visibility = 'visible';
+
+  // Slack servers allow CORS
+  // Couldn't get POST to work for this API, so we'll use GET throughout
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'https://slack.com/api/channels.list'
+    + '?token=' + slackToken
+    + '&exclude_archived=1');
+  xhr.onload = parseSlackChannels;
+  xhr.send();
+
+  document.addEventListener('tf-hangoutsready', revealUI);
+  document.addEventListener('tf-chanlistready', revealUI);
+
+  function revealUI() {
+    readyEvents ++;
+    if (readyEvents === 2) {
+      document.getElementById('postSlack').style.visibility = 'visible';
+      statusContainer.innerHTML = 'Ready';
+    }
   });
 }
 
