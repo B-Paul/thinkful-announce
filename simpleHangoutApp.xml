@@ -106,7 +106,8 @@ function parseSpreadsheetCells(data) {
   });
 
   Object.keys(officeHours.rows).sort().forEach(function (rowNum) {
-    var row = officeHours.rows[rowNum], props = {}, date, time, start, end;
+    var row = officeHours.rows[rowNum], props = {},
+      date, timezone, time, start, end;
 
     // Make a new object with all the properties of the current row, the proto-
     // type of which is the object created in this way from the previous row.
@@ -118,16 +119,26 @@ function parseSpreadsheetCells(data) {
 
     console.log(hangout);
     date = nextOfWeekday(hangout['Day']).toDateString();
+    timezone = date.getTimezoneOffset() === jan1.getTimezoneOffset()
+      ? 'EST'
+      : 'EDT';
     time = hangout['Time (EST)'].split('-');
     start = time[0].trim();
     end = time[1].trim();
-    hangout.start = new Date(date + ' ' + start);
-    hangout.end = new Date(date + ' ' + end);
+    hangout.start = new Date([date, start, timezone].join(' '));
+    hangout.end = new Date([date, end, timezone].join(' '));
 
     officeHours.rows[rowNum] = hangout;
   });
 
   document.dispatchEvent(new Event('tf-hangoutsready'));
+
+  function jan1() {
+    var d = new Date();
+    d.setMonth(0);
+    d.setDay(1);
+    return d;
+  }
 }
 
 function nextOfWeekday(wkdayName) {
