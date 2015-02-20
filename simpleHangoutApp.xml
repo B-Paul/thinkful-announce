@@ -196,8 +196,8 @@ function announce() {
         } else {
           message += participant.person.displayName;
         }
+      });
     }
-    });
   } else {
     message += 'The next office hours session will be in ';
     message += timeLeft + ' minutes ';
