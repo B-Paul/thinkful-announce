@@ -32,9 +32,12 @@
 }
 
 .button {
+  border: none;
   background-color: #427fed;
   color: white;
-  line-height: 28px;
+  line-height: 20px;
+  padding: 4px;
+  font-size: 1.15em;
 }
 
 #controls label {
@@ -43,6 +46,10 @@
 
 #time-left {
   font-size: 1.75em;
+}
+
+#status {
+  padding-top: 1em;
 }
 
 </style>
