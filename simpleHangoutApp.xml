@@ -198,9 +198,9 @@ function postSlack_() {
   if (timeLeft < 0) {
     message += 'Office hours on now with ';
     message += hangout['Host'];
-    message += '\n\nCurrent hangout participants:';
+    message += '\\n\\nCurrent hangout participants:';
     getParticipants().forEach(function (participant) {
-      message += '\n'
+      message += '\\n'
       if (!participant.person) {
         message += 'Unknown';
       } else {
