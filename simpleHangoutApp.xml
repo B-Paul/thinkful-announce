@@ -233,8 +233,8 @@ function parseSlackChannels() {
       label = document.createElement('label');
     elem.style.display = 'inline-block';
     elem.style.width = '40%';
-    elem.style.padding-left: '5%';
-    elem.style.overflow: 'hidden';
+    elem.style.padding-left = '5%';
+    elem.style.overflow = 'hidden';
     cbox.type = 'checkbox';
     cbox.class = 'channel';
     cbox.checked = true;
