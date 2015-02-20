@@ -116,6 +116,7 @@ function parseSpreadsheetCells(data) {
     });
     hangout = Object.create(hangout, props);
 
+    console.log(hangout);
     date = nextOfWeekday(hangout['Day']).toDateString();
     time = hangout['Time (EST)'].split('-');
     start = time[0].trim();
@@ -139,6 +140,8 @@ function nextOfWeekday(wkdayName) {
     'Friday':    5,
     'Saturday':  6
   }[wkdayName];
+  console.log(wkdayName);
+  console.log(targetDay);
   if (isNaN(+targetDay)) { throw new Error('Bad weekday name'); }
   while (date.getDay() !== targetDay) {
     date.setDate(date.getDate() + 1);
