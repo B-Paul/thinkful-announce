@@ -173,6 +173,7 @@ function parseSpreadsheetCells(data) {
 var channels;
 
 function parseSlackChannels(response) {
+  console.log(response);
   channels = response.channels.map(function (c) { return c.id; });
   document.dispatchEvent(new Event('tf-chanlistready'));
 }
