@@ -194,7 +194,7 @@ function checkSlack(response) {
 
 function postSlack_() {
   var hangout = nextByTime(officeHours.rows);
-  var timeLeft = Math.floor((hangout.start() - new Date()) / 1000 * 60)
+  var timeLeft = Math.floor((hangout.start - new Date()) / 1000 * 60)
   var message = 'Test message: '
   if (timeLeft < 0) {
     message += 'Office hours on now with '
