@@ -174,17 +174,21 @@ function nextByTime(map) {
 }
 
 function postSlack(message, channel) {
+  message = JSON.stringify([{
+    fallback: message,
+    pretext: 'Test message',
+    text: message.replace('\n', '\\n')
+  }]);
+
   var token = 'xoxp-2442078175-3326376290-3725937040-91e5d7';
-  var url = 'https://slack.com/api/chat.postMessage';
+  var url = 'https://slack.com/api/chat.postMessage'
+    + '?token=' + token
+    + '&channel=' + channel
+    + '&attachments=' + message;
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', url);
-  xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+  xhr.open('GET', url);
   xhr.onload = checkSlack;
-  xhr.send(JSON.stringify({
-    token: token,
-    channel: channel,
-    text: message
-  }));
+  xhr.send();
 }
 
 function checkSlack(response) {
@@ -200,9 +204,9 @@ function postSlack_() {
   if (timeLeft < 0) {
     message += 'Office hours on now with ';
     message += hangout['Host'];
-    message += '\\n\\nCurrent hangout participants:';
+    message += '\n\nCurrent hangout participants:';
     getParticipants().forEach(function (participant) {
-      message += '\\n'
+      message += '\n'
       if (!participant.person) {
         message += 'Unknown';
       } else {
