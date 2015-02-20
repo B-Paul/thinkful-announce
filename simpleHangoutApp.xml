@@ -29,7 +29,7 @@
 <p>
 <input class="button" type="button" value="Post Test Slack" id="postSlack"
     style="visibility:hidden;"
-    onclick="postSlack()"/>
+    onclick="postSlack_()"/>
 </p>
 
 <div id="data"></div>
@@ -109,6 +109,8 @@ function parseSpreadsheetCells(data) {
     var row = officeHours.rows[rowNum], props = {},
       date, timezone, time, start, end;
 
+    delete officeHours.rows[rowNum];
+
     // Make a new object with all the properties of the current row, the proto-
     // type of which is the object created in this way from the previous row.
     // This is to cover any columns that are missing from a particular row.
@@ -117,7 +119,6 @@ function parseSpreadsheetCells(data) {
     });
     hangout = Object.create(hangout, props);
 
-    console.log(hangout);
     date = nextOfWeekday(hangout['Day']);
     timezone = date.getTimezoneOffset() === jan1().getTimezoneOffset()
       ? 'EST'
@@ -126,10 +127,10 @@ function parseSpreadsheetCells(data) {
     time = hangout['Time (EST)'].split('-');
     start = time[0].trim();
     end = time[1].trim();
-    hangout.start = new Date([date, start, timezone].join(' '));
-    hangout.end = new Date([date, end, timezone].join(' '));
+    hangout.start = start = new Date([date, start, timezone].join(' '));
+    hangout.end = end = new Date([date, end, timezone].join(' '));
 
-    officeHours.rows[rowNum] = hangout;
+    officeHours.rows[hangout.start.getTime()] = hangout;
   });
 
   document.dispatchEvent(new Event('tf-hangoutsready'));
@@ -152,13 +153,18 @@ function nextOfWeekday(wkdayName) {
     'Friday':    5,
     'Saturday':  6
   }[wkdayName];
-  console.log(wkdayName);
-  console.log(targetDay);
   if (isNaN(+targetDay)) { throw new Error('Bad weekday name'); }
   while (date.getDay() !== targetDay) {
     date.setDate(date.getDate() + 1);
   }
   return date;
+}
+
+function nextByTime(map) {
+  var times = Object.keys(map), now = new Date().getTime();
+  times.push(now);
+  times = times.sort();
+  return map[times.indexOf(now) + 1];
 }
 
 function postSlack(message) {
@@ -167,15 +173,22 @@ function postSlack(message) {
   // var url = 'https://slack.com/api/chat.postMessage?token=' + token + '&channel=' + opensource + '&text=' + message;
   // var xhr = new XMLHttpRequest();
   // xhr.open('GET', url);
-  // xhr.onLoad = checkSlack;
+  // xhr.onload = checkSlack;
   // xhr.send();
-  console.log(officeHours.rows);
+  console.log(message);
 }
 
 function checkSlack(response) {
   console.log(response);
   var div = document.getElementById('data');
   div.innerHTML = JSON.stringify(response);
+}
+
+function postSlack_() {
+  var message = 'Test message: '
+  message += 'The next office hours will be: \n'
+  message += JSON.stringify(nextByTime(officeHours.rows));
+  postSlack(message);
 }
 
 function init() {
