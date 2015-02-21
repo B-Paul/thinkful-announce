@@ -48,6 +48,11 @@ body {
   font-size: 1.1em;
 }
 
+#timer .button {
+  float: right;
+  margin: .7em;
+}
+
 h5 {
   margin-top: 1.4em;
   margin-bottom: .6em;
@@ -75,6 +80,8 @@ h5 {
 
 <script src="//plus.google.com/hangouts/_/api/v1/hangout.js"></script>
 
+<div id="content">
+
 <h3>Office Hours Announcer</h3>
 
 <p id="info">If office hours are in session, bot will post the display names of
@@ -100,6 +107,8 @@ next session instead. Auto repost is not available outside of office hours.</p>
 </div>
 
 <div id="status"></div>
+
+</div>
 
 <script>
 var spreadsheetId = '1dbQ5XLk8k83b1Za3Ugmp4PW-9QKaW9j46Pmd0fLT96Y/od6';
@@ -288,6 +297,7 @@ function toggleNextAnnouncePaused() {
 function cancelNextAnnounce() {
   nextAnnounce = null;
   nextAnnouncePaused = null;
+  pauseControl.value = 'Pause';
 }
 
 function nextByTime(map) {
