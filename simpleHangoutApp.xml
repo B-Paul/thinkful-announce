@@ -333,7 +333,7 @@ function postSlack(message, channel, channelName) {
   var xhr = new XMLHttpRequest();
   xhr.open('GET', url);
   xhr.onload = callback;
-  xhr.send();
+  console.log('sending') // xhr.send();
 }
 
 function getParticipants() {
