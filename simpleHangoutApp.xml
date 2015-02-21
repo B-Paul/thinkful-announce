@@ -75,6 +75,7 @@ h5 {
 
 #status {
   padding-top: 1em;
+  font-size: .8em;
 }
 
 </style>
@@ -252,7 +253,7 @@ function announce() {
     }
   });
 
-  if (!repostControl.checked) { return; }
+  // if (!repostControl.checked) { return; }
 
   nextAnnounce = Math.max(
     Date.now() + (1000 * 60 * autoPostInterval),
