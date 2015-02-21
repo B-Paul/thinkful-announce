@@ -362,7 +362,6 @@ function cancelNextAnnounce() {
 
 function nextByTime(map) {
   var times, now, lastStart, nextStart, hangout;
-  console.log(map);
   times = Object.keys(map);
   now = Date.now();
 
@@ -373,7 +372,7 @@ function nextByTime(map) {
   nextStart = times[now + 1];
 
   hangout = map[lastStart];
-  if (hangout.end.getTime() < now) { hangout = map[nextStart]; }
+  if (!lastStart || hangout.end.getTime() <= now) { hangout = map[lastStart]; }
 
   return hangout;
 }
