@@ -75,7 +75,7 @@ h5 {
 
 #status {
   padding-top: 1em;
-  font-size: .8em;
+  font-size: .9em;
 }
 
 </style>
@@ -118,6 +118,8 @@ var channelsContainer = document.getElementById('channels');
 var repostControl = document.getElementById('repost');
 var timerDisplay = document.getElementById('timer');
 var pauseControl = document.getElementById('pauseTimer');
+var autoPostInterval = 15 // minutes;
+
 var officeHours;
 
 function parseSpreadsheetCells(data) {
