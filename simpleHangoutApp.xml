@@ -94,14 +94,16 @@ next session instead.</p>
   <input type="checkbox" id="repost" checked="checked" />
   <label for="repost">Post again in 15 minutes</label>
 
+  <div id="timer">
+    <p>Auto post in: <span id="time-left"></span></p>
+    <input class="button" type="button" value="Pause" id="pauseTimer"
+      onclick="toggleNextAnnouncePaused()" />
+    <input class="button" type="button" value="Stop" id="stopTimer"
+      onclick="cancelNextAnnounce()" />
+  </div>
+
   <h5>Channels</h5>
   <div id="channels"></div>
-</div>
-
-<div id="timer">
-  <p>Auto post in: <span id="time-left"></span></p>
-  <input class="button" type="button" value="Pause" id="pauseTimer" />
-  <input class="button" type="button" value="Stop" id="stopTimer" />
 </div>
 
 <div id="status"></div>
@@ -112,62 +114,9 @@ var slackToken = 'xoxp-2442078175-3326376290-3725937040-91e5d7';
 var officeHoursHangout = 'https://plus.google.com/hangouts/_/event/c27caov1if6tvbkjn7473q7v0v4';
 var statusContainer = document.getElementById('status');
 var channelsContainer = document.getElementById('channels');
-
-// Object type to hold the spreadsheet data
-function Grid() {
-  this.cols = {};
-  this.rows = {};
-  this.add = this._addColumn;
-}
-
-Grid.prototype._addColumn = function (address, text) {
-  var row = address.row, col = address.col;
-  // Use the rows object to keep track of row numbers we've been given.
-  this.rows[row] = this.rows[row];
-
-  // Add column names for each header row
-  if (Object.keys(this.rows).length <= 1) {
-    this.cols[col] = text;
-    return this;
-  }
-
-  // As soon as past the first row, assume all column headers have been given
-  // and switch modes 
-  this.add = this._addData;
-  this._addColumn = null;
-  // Throw away the record of the header row.
-  this.rows = {};
-  return this.add(address, text);
-};
-
-Grid.prototype._addData = function (address, text) {
-  var row = address.row, col = address.col, colName, rowData;
-
-  if (this._addColumn !== null) {
-    return this._addColumn(address, text);
-  } else if (!(col in this.cols)) {
-    throw new Error('no header value for this column');
-  }
-
-  colName = this.cols[col];
-  rowData = this.rows[row] = this.rows[row] || this.mkRow();
-  if (rowData[colName] !== void 0) {
-    throw new Error('overlapping data');
-  }
-
-  rowData[colName] = text;
-  return this;
-};
-
-Grid.prototype.mkRow = function () {
-  var rowData = {}, cols = this.cols;
-  Object.keys(cols).forEach(function (key) {
-    var colName = cols[key];
-    rowData[colName] = void 0;
-  });
-  return rowData;
-};
-
+var repostControl = document.getElementById('repost');
+var timerDisplay = document.getElementById('timer');
+var pauseControl = document.getElementById('pauseTimer');
 var officeHours;
 
 function parseSpreadsheetCells(data) {
@@ -261,6 +210,8 @@ function parseSlackChannels() {
   document.dispatchEvent(new Event('tf-chanlistready'));
 }
 
+var nextAnnounce, nextAnnouncePaused;
+
 function announce() {
   var hangout = nextByTime(officeHours.rows);
   var timeLeft = Math.floor((hangout.start - new Date()) / (1000 * 60))
@@ -288,27 +239,59 @@ function announce() {
     message += timeLeft + ' minutes ';
     message += 'with ';
     message += hangout['Host'];
+    repostControl.checked = false;
   }
 
   statusContainer.innerHTML = '';
-  console.log('ready to loop');
-  console.log(document.querySelectorAll('.channel'));
 
   [].forEach.call(document.querySelectorAll('.channel'), function (elem) {
     var cbox = elem.querySelector('input'),
       label = elem.querySelector('label');
     if (cbox.checked) {
-      console.log('message =', message);
-      console.log('id =', cbox.id);
-      console.log('name =', label.innerText);
-      // postSlack(message, cbox.id, label.innerText);
+      postSlack(message, cbox.id, label.innerText);
     }
   });
-  // TODO: set up a timer to repeat the message
+
+  if (!repostControl.checked) { return; }
+
+  nextAnnounce = Math.max(
+    Date.now() + (1000 * 60 * autoPostInterval),
+    hangout.end.getTime());
+  (function timerLoop() {
+    var timeLeft = Math.floor((nextAnnounce - Date.now()) / 1000),
+      secondsLeft = timeLeft % 60
+      minutesLeft = (timeLeft - secondsLeft) / 60;
+    if (nextAnnounce == null) {
+      return;
+    } else if (timeLeft <= 0) {
+      timerDisplay.innerHTML = '';
+      timerDisplay.style.display = 'none';
+      return announce();
+    } else if (nextAnnouncePaused == null) {
+      timerDisplay.innerHTML = secondsLeft + ':' + minutesLeft;
+    }
+    timerDisplay.style.display = 'inline';
+    setTimeout(timerLoop, 500);
+  }());
+}
+
+function toggleNextAnnouncePaused() {
+  if (nextAnnouncePaused == null) {
+    nextAnnouncePaused = nextAnnounce - Date.now();
+    pauseControl.value = 'Pause';
+  } else {
+    nextAnnounce = Date.now() + nextAnnouncePaused;
+    nextAnnouncePaused = null;
+    pauseControl.value = 'Resume';
+  }
+}
+
+function cancelNextAnnounce() {
+  nextAnnounce = null;
 }
 
 function nextByTime(map) {
-  var times = Object.keys(map), now = new Date().getTime(),
+  var times = Object.keys(map), now = Date.now(),
     lastStart, nextStart, hangout;
   times.push(now);
   times = times.sort();
@@ -393,6 +376,61 @@ function init() {
     }
   };
 }
+
+// Object type to hold the spreadsheet data
+function Grid() {
+  this.cols = {};
+  this.rows = {};
+  this.add = this._addColumn;
+}
+
+Grid.prototype._addColumn = function (address, text) {
+  var row = address.row, col = address.col;
+  // Use the rows object to keep track of row numbers we've been given.
+  this.rows[row] = this.rows[row];
+
+  // Add column names for each header row
+  if (Object.keys(this.rows).length <= 1) {
+    this.cols[col] = text;
+    return this;
+  }
+
+  // As soon as past the first row, assume all column headers have been given
+  // and switch modes 
+  this.add = this._addData;
+  this._addColumn = null;
+  // Throw away the record of the header row.
+  this.rows = {};
+  return this.add(address, text);
+};
+
+Grid.prototype._addData = function (address, text) {
+  var row = address.row, col = address.col, colName, rowData;
+
+  if (this._addColumn !== null) {
+    return this._addColumn(address, text);
+  } else if (!(col in this.cols)) {
+    throw new Error('no header value for this column');
+  }
+
+  colName = this.cols[col];
+  rowData = this.rows[row] = this.rows[row] || this.mkRow();
+  if (rowData[colName] !== void 0) {
+    throw new Error('overlapping data');
+  }
+
+  rowData[colName] = text;
+  return this;
+};
+
+Grid.prototype.mkRow = function () {
+  var rowData = {}, cols = this.cols;
+  Object.keys(cols).forEach(function (key) {
+    var colName = cols[key];
+    rowData[colName] = void 0;
+  });
+  return rowData;
+};
 
 // Wait for gadget to load.                                                       
 gadgets.util.registerOnLoadHandler(init);
