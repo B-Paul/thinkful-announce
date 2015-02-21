@@ -31,10 +31,6 @@ body {
   color: #40404b;
 }
 
-#controls, #timer {
-  min-height: 2.5em;
-}
-
 #controls {
   visibility: hidden;
 }
@@ -55,6 +51,7 @@ body {
 h5 {
   margin-top: 1.4em;
   margin-bottom: .6em;
+  font-size: 1.1em;
 }
 
 #time-left {
@@ -81,8 +78,8 @@ h5 {
 <h3>Office Hours Announcer</h3>
 
 <p id="info">If office hours are in session, bot will post the display names of
-participants to the specified channels. If not, it will post a time until the
-next session instead.</p>
+participants to the specified channels. If not, it will post the time until the
+next session instead. Auto repost is not available outside of office hours.</p>
 
 <div id="controls">
   <input class="button" type="button" value="Post to Slack" id="postSlack"
@@ -268,10 +265,12 @@ function announce() {
     }
 
     if (nextAnnouncePaused == null) {
+      secondsLeft = '00' + secondsLeft;
+      secondsLeft = secondsLeft.slice(secondsLeft.length - 2);
       timerDisplay.innerHTML = minutesLeft + ':' + secondsLeft;
     }
-    timerContainer.style.display = 'inline';
-    setTimeout(timerLoop, 500);
+    timerContainer.style.display = 'block';
+    setTimeout(timerLoop, 100);
   }());
 }
 
@@ -288,6 +287,7 @@ function toggleNextAnnouncePaused() {
 
 function cancelNextAnnounce() {
   nextAnnounce = null;
+  nextAnnouncePaused = null;
 }
 
 function nextByTime(map) {
