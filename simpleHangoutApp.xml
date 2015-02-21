@@ -137,7 +137,7 @@ var repostControl = document.getElementById('repost');
 var timerContainer = document.getElementById('timer');
 var timerDisplay = document.getElementById('time-left');
 var pauseControl = document.getElementById('pauseTimer');
-var autoPostInterval = 15 // minutes;
+var autoPostInterval = 15; // minutes
 
 var officeHours;
 
@@ -280,7 +280,6 @@ function announce() {
   var hangout, timeLeft, message, participants;
   hangout = nextByTime(officeHours.rows);
   timeLeft = Math.floor((hangout.start - new Date()) / (1000 * 60));
-  message = '';
 
   if (timeLeft <= 0) {
     message = 'Office hours on now with ' + hangout['Host']
@@ -363,13 +362,15 @@ function cancelNextAnnounce() {
 
 function nextByTime(map) {
   var times, now, lastStart, nextStart, hangout;
+  console.log(map);
   times = Object.keys(map);
   now = Date.now();
 
   times.push(now);
   times = times.sort();
-  lastStart = times[times.indexOf(now) - 1];
-  nextStart = times[times.indexOf(now) + 1];
+  now = times.indexOf(now);
+  lastStart = times[now - 1];
+  nextStart = times[now + 1];
 
   hangout = map[lastStart];
   if (hangout.end.getTime() < now) { hangout = map[nextStart]; }
