@@ -116,7 +116,8 @@ var officeHoursHangout = 'https://plus.google.com/hangouts/_/event/c27caov1if6tv
 var statusContainer = document.getElementById('status');
 var channelsContainer = document.getElementById('channels');
 var repostControl = document.getElementById('repost');
-var timerDisplay = document.getElementById('timer');
+var timerContainer = document.getElementById('timer');
+var timerDisplay = document.getElementById('time-left');
 var pauseControl = document.getElementById('pauseTimer');
 var autoPostInterval = 15 // minutes;
 
@@ -257,7 +258,7 @@ function announce() {
 
   // if (!repostControl.checked) { return; }
 
-  nextAnnounce = Math.max(
+  nextAnnounce = Math.min(
     Date.now() + (1000 * 60 * autoPostInterval),
     hangout.end.getTime());
   (function timerLoop() {
@@ -268,12 +269,12 @@ function announce() {
       return;
     } else if (timeLeft <= 0) {
       timerDisplay.innerHTML = '';
-      timerDisplay.style.display = 'none';
+      timerContainer.style.display = 'none';
       return announce();
     } else if (nextAnnouncePaused == null) {
-      timerDisplay.innerHTML = secondsLeft + ':' + minutesLeft;
+      timerDisplay.innerHTML = minutesLeft + ':' + secondsLeft;
     }
-    timerDisplay.style.display = 'inline';
+    timerContainer.style.display = 'inline';
     setTimeout(timerLoop, 500);
   }());
 }
