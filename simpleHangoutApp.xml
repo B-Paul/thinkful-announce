@@ -22,9 +22,13 @@
 <html>
 <style>
 
-body {
-  padding: .8em;
+#content {
   font-size: .8em;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  padding: .8em;
+  overflow-y: scroll;
 }
 
 #info {
@@ -48,9 +52,13 @@ body {
   font-size: 1.1em;
 }
 
+#timer p {
+  float: left;
+}
+
 #timer .button {
   float: right;
-  margin: .7em;
+  margin: .8em .4em;
 }
 
 h5 {
@@ -257,7 +265,7 @@ function announce() {
     }
   });
 
-  // if (!repostControl.checked) { return; }
+  if (!repostControl.checked) { return; }
 
   nextAnnounce = Math.min(
     Date.now() + (1000 * 60 * autoPostInterval),
@@ -343,7 +351,7 @@ function postSlack(message, channel, channelName) {
   var xhr = new XMLHttpRequest();
   xhr.open('GET', url);
   xhr.onload = callback;
-  console.log('sending') // xhr.send();
+  xhr.send();
 }
 
 function getParticipants() {
