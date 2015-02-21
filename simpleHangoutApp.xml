@@ -84,6 +84,14 @@ h5 {
   padding-top: 1em;
 }
 
+.success {
+  color: green;
+}
+
+.failure {
+  color: red;
+}
+
 </style>
 <body>
 
@@ -134,19 +142,20 @@ var autoPostInterval = 15 // minutes;
 var officeHours;
 
 function init() {
-  var readyEvents = 0;
+  var readyEvents, script, xhr;
+  readyEvents = 0;
 
   statusContainer.innerHTML = 'Loading resources...';
 
   // This is a JSONP call
-  var script = document.createElement('script');
+  script = document.createElement('script');
   script.src = '//spreadsheets.google.com/feeds/cells/' + spreadsheetId
     + '/public/basic?alt=json-in-script&callback=parseSpreadsheetCells';
   document.body.appendChild(script);
 
   // Slack servers allow CORS
   // Couldn't get POST to work for this API, so we'll use GET throughout
-  var xhr = new XMLHttpRequest();
+  xhr = new XMLHttpRequest();
   xhr.open('GET', 'https://slack.com/api/channels.list'
     + '?token=' + slackToken
     + '&exclude_archived=1');
@@ -181,7 +190,8 @@ function parseSpreadsheetCells(data) {
   });
 
   Object.keys(officeHours.rows).sort().forEach(function (rowNum) {
-    var row = officeHours.rows[rowNum], date, timezone, time, start, end;
+    var row, date, timezone, time, start, end;
+    row = officeHours.rows[rowNum];
 
     delete officeHours.rows[rowNum];
 
@@ -239,35 +249,43 @@ function parseSpreadsheetCells(data) {
 
 function parseSlackChannels() {
   var container = channelsContainer;
+
   JSON.parse(this.responseText).channels.forEach(function (channel) {
-    var elem = document.createElement('div'),
-      cbox = document.createElement('input'),
-      label = document.createElement('label');
+    var elem, cbox, label;
+    elem = document.createElement('div');
+    cbox = document.createElement('input');
+    label = document.createElement('label');
+
     elem.className = 'channel';
+
     cbox.type = 'checkbox';
     cbox.checked = true;
     cbox.id = channel.id;
+
     label.htmlFor = channel.id;
     label.innerHTML = channel.name;
+
     elem.appendChild(cbox);
     elem.appendChild(label);
+
     container.appendChild(elem);
   });
+
   document.dispatchEvent(new Event('tf-chanlistready'));
 }
 
 var nextAnnounce, nextAnnouncePaused;
 
 function announce() {
-  var hangout = nextByTime(officeHours.rows);
-  var timeLeft = Math.floor((hangout.start - new Date()) / (1000 * 60))
-  var message = '';
-  var participants;
+  var hangout, timeLeft, message, participants;
+  hangout = nextByTime(officeHours.rows);
+  timeLeft = Math.floor((hangout.start - new Date()) / (1000 * 60));
+  message = '';
 
-  if (timeLeft < 0) {
-    message += 'Office hours on now with ';
-    message += hangout['Host'];
-    message += '\nTime slot: ' + hangout['Time (EST)'];
+  if (timeLeft <= 0) {
+    message = 'Office hours on now with ' + hangout['Host']
+      + '\nTopic: ' + hangout['Course']
+      + '\nTime slot: ' + hangout['Time (EST)'];
     participants = getParticipants();
     if (participants.length) {
       message += '\nCurrent hangout participants:';
@@ -281,18 +299,18 @@ function announce() {
       });
     }
   } else {
-    message += 'The next office hours session will be in ';
-    message += timeLeft + ' minutes ';
-    message += 'with ';
-    message += hangout['Host'];
+    message = 'The next office hours session will be in '
+      + timeLeft + ' minutes with ' + hangout['Host']
+      + '\nTopic: ' + hangout['Course'];
     repostControl.checked = false;
   }
 
   statusContainer.innerHTML = '';
 
   [].forEach.call(document.querySelectorAll('.channel'), function (elem) {
-    var cbox = elem.querySelector('input'),
-      label = elem.querySelector('label');
+    var cbox, label;
+    cbox = elem.querySelector('input');
+    label = elem.querySelector('label');
     if (cbox.checked) {
       postSlack(message, cbox.id, label.innerText);
     }
@@ -303,10 +321,12 @@ function announce() {
   nextAnnounce = Math.min(
     Date.now() + (1000 * 60 * autoPostInterval),
     hangout.end.getTime());
+
   (function timerLoop() {
-    var timeLeft = Math.floor((nextAnnounce - Date.now()) / 1000),
-      secondsLeft = timeLeft % 60
-      minutesLeft = (timeLeft - secondsLeft) / 60;
+    var timeLeft, secondsLeft, minutesLeft;
+    timeLeft = Math.floor((nextAnnounce - Date.now()) / 1000);
+    secondsLeft = timeLeft % 60;
+    minutesLeft = (timeLeft - secondsLeft) / 60;
 
     if (nextAnnounce == null || timeLeft <= 0) {
       timerDisplay.innerHTML = '';
@@ -342,8 +362,10 @@ function cancelNextAnnounce() {
 }
 
 function nextByTime(map) {
-  var times = Object.keys(map), now = Date.now(),
-    lastStart, nextStart, hangout;
+  var times, now, lastStart, nextStart, hangout;
+  times = Object.keys(map);
+  now = Date.now();
+
   times.push(now);
   times = times.sort();
   lastStart = times[times.indexOf(now) - 1];
@@ -356,13 +378,15 @@ function nextByTime(map) {
 }
 
 function postSlack(message, channel, channelName) {
+  var status, url, xhr;
+
   message = JSON.stringify([{
     fallback: message,
     pretext: 'http://office-hours.thinkful.com/',
     text: message.replace('\n', '\\n')
   }]);
 
-  var status = document.createElement('p');
+  status = document.createElement('p');
   status.innerHTML = 'Posting to ' + channelName + ':';
   statusContainer.appendChild(status);
   var callback = function (response) {
@@ -377,11 +401,12 @@ function postSlack(message, channel, channelName) {
     status.appendChild(result);
   };
 
-  var url = 'https://slack.com/api/chat.postMessage'
+  url = 'https://slack.com/api/chat.postMessage'
     + '?token=' + slackToken
     + '&channel=' + channel
     + '&attachments=' + message;
-  var xhr = new XMLHttpRequest();
+
+  xhr = new XMLHttpRequest();
   xhr.open('GET', url);
   xhr.onload = callback;
   xhr.send();
