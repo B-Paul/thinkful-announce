@@ -372,7 +372,7 @@ function nextByTime(map) {
   nextStart = times[now + 1];
 
   hangout = map[lastStart];
-  if (!lastStart || hangout.end.getTime() <= now) { hangout = map[lastStart]; }
+  if (!hangout || hangout.end.getTime() <= now) { hangout = map[nextStart]; }
 
   return hangout;
 }
