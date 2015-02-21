@@ -24,10 +24,10 @@
 
 body {
   padding: .8em;
+  font-size: .8em;
 }
 
 #info {
-  font-size: .8em;
   color: #40404b;
 }
 
@@ -49,11 +49,7 @@ body {
   color: white;
   line-height: 14px;
   padding: 7px;
-  font-size: .9em;
-}
-
-#controls label {
-  font-size: .8em;
+  font-size: 1.1em;
 }
 
 h5 {
@@ -75,7 +71,6 @@ h5 {
 
 #status {
   padding-top: 1em;
-  font-size: .9em;
 }
 
 </style>
@@ -265,13 +260,14 @@ function announce() {
     var timeLeft = Math.floor((nextAnnounce - Date.now()) / 1000),
       secondsLeft = timeLeft % 60
       minutesLeft = (timeLeft - secondsLeft) / 60;
-    if (nextAnnounce == null) {
-      return;
-    } else if (timeLeft <= 0) {
+
+    if (nextAnnounce == null || timeLeft <= 0) {
       timerDisplay.innerHTML = '';
       timerContainer.style.display = 'none';
-      return announce();
-    } else if (nextAnnouncePaused == null) {
+      return nextAnnounce ? announce() : void 0;
+    }
+
+    if (nextAnnouncePaused == null) {
       timerDisplay.innerHTML = minutesLeft + ':' + secondsLeft;
     }
     timerContainer.style.display = 'inline';
@@ -282,11 +278,11 @@ function announce() {
 function toggleNextAnnouncePaused() {
   if (nextAnnouncePaused == null) {
     nextAnnouncePaused = nextAnnounce - Date.now();
-    pauseControl.value = 'Pause';
+    pauseControl.value = 'Resume';
   } else {
     nextAnnounce = Date.now() + nextAnnouncePaused;
     nextAnnouncePaused = null;
-    pauseControl.value = 'Resume';
+    pauseControl.value = 'Pause';
   }
 }
 
