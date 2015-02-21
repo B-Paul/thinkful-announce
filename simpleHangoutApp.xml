@@ -65,6 +65,7 @@ h5 {
   margin-top: 1.4em;
   margin-bottom: .6em;
   font-size: 1.1em;
+  clear: left;
 }
 
 #time-left {
@@ -131,6 +132,38 @@ var pauseControl = document.getElementById('pauseTimer');
 var autoPostInterval = 15 // minutes;
 
 var officeHours;
+
+function init() {
+  var readyEvents = 0;
+
+  statusContainer.innerHTML = 'Loading resources...';
+
+  // This is a JSONP call
+  var script = document.createElement('script');
+  script.src = '//spreadsheets.google.com/feeds/cells/' + spreadsheetId
+    + '/public/basic?alt=json-in-script&callback=parseSpreadsheetCells';
+  document.body.appendChild(script);
+
+  // Slack servers allow CORS
+  // Couldn't get POST to work for this API, so we'll use GET throughout
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'https://slack.com/api/channels.list'
+    + '?token=' + slackToken
+    + '&exclude_archived=1');
+  xhr.onload = parseSlackChannels.bind(xhr);
+  xhr.send();
+
+  document.addEventListener('tf-hangoutsready', revealUI);
+  document.addEventListener('tf-chanlistready', revealUI);
+
+  function revealUI() {
+    readyEvents ++;
+    if (readyEvents === 2) {
+      document.getElementById('controls').style.visibility = 'visible';
+      statusContainer.innerHTML = 'Ready';
+    }
+  };
+}
 
 function parseSpreadsheetCells(data) {
   var hangout = Object.prototype;
@@ -361,38 +394,6 @@ function getParticipants() {
     return [];
   }
   return gapi.hangout.getParticipants();
-}
-
-function init() {
-  var readyEvents = 0;
-
-  statusContainer.innerHTML = 'Loading resources...';
-
-  // This is a JSONP call
-  var script = document.createElement('script');
-  script.src = '//spreadsheets.google.com/feeds/cells/' + spreadsheetId
-    + '/public/basic?alt=json-in-script&callback=parseSpreadsheetCells';
-  document.body.appendChild(script);
-
-  // Slack servers allow CORS
-  // Couldn't get POST to work for this API, so we'll use GET throughout
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', 'https://slack.com/api/channels.list'
-    + '?token=' + slackToken
-    + '&exclude_archived=1');
-  xhr.onload = parseSlackChannels.bind(xhr);
-  xhr.send();
-
-  document.addEventListener('tf-hangoutsready', revealUI);
-  document.addEventListener('tf-chanlistready', revealUI);
-
-  function revealUI() {
-    readyEvents ++;
-    if (readyEvents === 2) {
-      document.getElementById('controls').style.visibility = 'visible';
-      statusContainer.innerHTML = 'Ready';
-    }
-  };
 }
 
 // Object type to hold the spreadsheet data
