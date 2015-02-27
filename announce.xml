@@ -204,6 +204,7 @@ function parseSpreadsheetCells(data) {
     });
 
     // Calculate the start and end times
+    console.log(hangout);
     date = nextOfWeekday(hangout['Day']);
     timezone = date.getTimezoneOffset() === jan1().getTimezoneOffset()
       ? 'EST'
@@ -232,8 +233,6 @@ function parseSpreadsheetCells(data) {
       'Friday':    5,
       'Saturday':  6
     }[wkdayName];
-    console.log(wkdayName);
-    console.log(targetDay);
     if (isNaN(+targetDay)) { throw new Error('Bad weekday name'); }
     while (date.getDay() !== targetDay) {
       date.setDate(date.getDate() + 1);
