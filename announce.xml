@@ -192,7 +192,7 @@ function parseSpreadsheetCells(data) {
   console.log(data);
   console.log(officeHours);
 
-  Object.keys(officeHours.rows).sort().forEach(function (rowNum) {
+  Object.keys(officeHours.rows)map(Number).sort().forEach(function (rowNum) {
     var row, date, timezone, time, start, end;
     row = officeHours.rows[rowNum];
 
