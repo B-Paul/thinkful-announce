@@ -232,6 +232,8 @@ function parseSpreadsheetCells(data) {
       'Friday':    5,
       'Saturday':  6
     }[wkdayName];
+    console.log(wkdayName);
+    console.log(targetDay);
     if (isNaN(+targetDay)) { throw new Error('Bad weekday name'); }
     while (date.getDay() !== targetDay) {
       date.setDate(date.getDate() + 1);
