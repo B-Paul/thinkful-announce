@@ -317,9 +317,8 @@ function announce() {
 
   if (!repostControl.checked) { return; }
 
-  nextAnnounce = Math.min(
-    Date.now() + (1000 * 60 * autoPostInterval),
-    hangout.end.getTime());
+  nextAnnounce = Date.now() + (1000 * 60 * autoPostInterval)
+  if (nextAnnouce >= hangout.end.getTime()) { nextAnnounce = null; }
 
   (function timerLoop() {
     var timeLeft, secondsLeft, minutesLeft;
@@ -389,8 +388,10 @@ function postSlack(message, channel, channelName) {
   status = document.createElement('p');
   status.innerHTML = 'Posting to ' + channelName + ':';
   statusContainer.appendChild(status);
-  var callback = function (response) {
-    var result = document.createElement('span');
+  var callback = function () {
+    var response, result;
+    response = JSON.parse(xhr.responseText);
+    result = document.createElement('span');
     if (!response.ok || response.error != null) {
       result.className = 'result failure';
       result.innerHTML = response.error;
