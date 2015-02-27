@@ -198,13 +198,14 @@ function parseSpreadsheetCells(data) {
     // Make a new object with all the properties of the current row, the proto-
     // type of which is the object created in this way from the previous row.
     // This is to cover any columns that are missing from a particular row.
+    console.log(hangout);
     hangout = Object.create(hangout);
+    console.log(hangout);
     Object.keys(row).forEach(function (key) {
       if (row[key] !== void 0) { hangout[key] = row[key]; }
     });
 
     // Calculate the start and end times
-    console.log(hangout);
     date = nextOfWeekday(hangout['Day']);
     timezone = date.getTimezoneOffset() === jan1().getTimezoneOffset()
       ? 'EST'
