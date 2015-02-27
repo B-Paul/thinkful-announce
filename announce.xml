@@ -189,44 +189,40 @@ function parseSpreadsheetCells(data) {
     officeHours.add(address, text);
   });
 
-  console.log(data);
-  console.log(officeHours);
-  console.log(Object.keys(officeHours.rows)
+  Object.keys(officeHours.rows)
     .map(Number)
-    .sort(function (a, b) { return a - b }));
+    .sort(function (a, b) { return a - b })
+    .forEach(function (rowNum) {
+      var row, date, timezone, time, start, end;
+      row = officeHours.rows[rowNum];
 
-  Object.keys(officeHours.rows).map(Number).sort(function (a, b) { return a - b }).forEach(function (rowNum) {
-    var row, date, timezone, time, start, end;
-    row = officeHours.rows[rowNum];
+      delete officeHours.rows[rowNum];
 
-    console.log(rowNum);
+      // Make a new object with all the properties of the current row, the
+      // proto type of which is the object created in this way from the previous
+      // row. This is to cover any columns that are missing from a particular
+      // row.
+      hangout = Object.create(hangout);
+      Object.keys(row).forEach(function (key) {
+        if (row[key] !== void 0) { hangout[key] = row[key]; }
+      });
 
-    delete officeHours.rows[rowNum];
+      // Calculate the start and end times
+      date = nextOfWeekday(hangout['Day']);
+      timezone = date.getTimezoneOffset() === jan1().getTimezoneOffset()
+        ? 'EST'
+        : 'EDT';
+      date = date.toDateString();
+      time = hangout['Time (EST)'].split('-');
+      start = time[0].trim();
+      end = time[1].trim();
+      hangout.start = start = new Date([date, start, timezone].join(' '));
+      hangout.end = end = new Date([date, end, timezone].join(' '));
 
-    // Make a new object with all the properties of the current row, the proto-
-    // type of which is the object created in this way from the previous row.
-    // This is to cover any columns that are missing from a particular row.
-    hangout = Object.create(hangout);
-    Object.keys(row).forEach(function (key) {
-      if (row[key] !== void 0) { hangout[key] = row[key]; }
+      // Add the hangout info back into rows by start time (Allows comparison to
+      // the current time)
+      officeHours.rows[hangout.start.getTime()] = hangout;
     });
-
-    // Calculate the start and end times
-    date = nextOfWeekday(hangout['Day']);
-    timezone = date.getTimezoneOffset() === jan1().getTimezoneOffset()
-      ? 'EST'
-      : 'EDT';
-    date = date.toDateString();
-    time = hangout['Time (EST)'].split('-');
-    start = time[0].trim();
-    end = time[1].trim();
-    hangout.start = start = new Date([date, start, timezone].join(' '));
-    hangout.end = end = new Date([date, end, timezone].join(' '));
-
-    // Add the hangout info back into rows by start time (Allows comparison to
-    // the current time)
-    officeHours.rows[hangout.start.getTime()] = hangout;
-  });
 
   document.dispatchEvent(new Event('tf-hangoutsready'));
 
@@ -394,7 +390,7 @@ function postSlack(message, channel, channelName) {
   }]);
 
   status = document.createElement('p');
-  status.innerHTML = 'Posting to ' + channelName + ':';
+  status.innerHTML = 'Posting to ' + channelName + ': ';
   statusContainer.appendChild(status);
   var callback = function () {
     var response, result;
