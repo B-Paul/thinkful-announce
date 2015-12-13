@@ -383,10 +383,11 @@ function nextByTime(map) {
 function postSlack(message, channel, channelName) {
   var status, url, xhr;
 
+  message = encodeURIComponent(message);
   message = JSON.stringify([{
     fallback: message,
     pretext: 'http://office-hours.thinkful.com/',
-    text: message.replace('\n', '\\n')
+    text: message
   }]);
 
   status = document.createElement('p');
